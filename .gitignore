@@ -7,21 +7,38 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+frontend/node_modules
+backend/node_modules
+
+# Build outputs
 dist
 dist-ssr
 .output
 .vinxi
 .tanstack/**
 .nitro
-*.local
+backend/dist
+
+# Environment files (never commit actual secrets)
 .env
 .env.*
 !.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
 
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+
+# Misc
+*.local
+bash.exe.stackdump
 
 # Editor directories and files
 .vscode/*

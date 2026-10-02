@@ -3,7 +3,7 @@ import type {
   ContributorProject,
   MemberProjectSummary,
   ProjectStatus,
-} from "./team-analytics-service";
+} from "../types/team-analytics.types";
 
 // ── GitHub Search API types ──────────────────────────────────────────────────
 

@@ -1,5 +1,5 @@
 import { extractGitHubToken, type SimplifiedRepo } from "./github-api";
-import { getEnv } from "./env";
+import { getEnv } from "../config/env";
 
 export interface ContributedRepo extends SimplifiedRepo {
   contribution_types: string[]; // e.g. ["PushEvent", "PullRequestEvent"]

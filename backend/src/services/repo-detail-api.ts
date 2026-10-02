@@ -1,5 +1,5 @@
 import { extractGitHubToken } from "./github-api";
-import { getEnv } from "./env";
+import { getEnv } from "../config/env";
 
 export interface ContributorDetail {
   login: string;

@@ -1,16 +1,21 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 let envLoaded = false;
 
 /**
- * Loads .env variables into process.env from the project root.
+ * Loads .env variables into process.env from the backend root.
  */
 export function loadProjectEnv(): void {
   if (typeof process === "undefined" || !process.cwd) return;
+  if (envLoaded) return;
 
   try {
-    const envPath = path.resolve(process.cwd(), ".env");
+    // Look for .env in the backend directory (one level up from src/config/)
+    const envPath = path.resolve(__dirname, "../../.env");
     if (!fs.existsSync(envPath)) return;
 
     const content = fs.readFileSync(envPath, "utf-8");
