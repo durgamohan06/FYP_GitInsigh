@@ -7,7 +7,10 @@ let envLoaded = false;
  * Loads .env variables into process.env from the project root.
  */
 export function loadProjectEnv(): void {
+  if (envLoaded) return;
   if (typeof process === "undefined" || !process.cwd) return;
+
+  envLoaded = true;
 
   try {
     const envPath = path.resolve(process.cwd(), ".env");
@@ -34,9 +37,12 @@ export function loadProjectEnv(): void {
         value = value.slice(1, -1);
       }
 
-      process.env[key] = value;
+      // Hosting platforms inject production secrets before the app starts. A
+      // developer's .env file must never replace those values.
+      if (process.env[key] === undefined) {
+        process.env[key] = value;
+      }
     }
-    envLoaded = true;
   } catch (err) {
     console.error("Failed to load .env:", err);
   }

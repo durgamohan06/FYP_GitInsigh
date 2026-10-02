@@ -1,3 +1,4 @@
+import { nodeRepositoryManagement } from "./src/lib/repository-management";
 import { defineConfig, type ConfigEnv, type Plugin, type PluginOption } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -14,6 +15,7 @@ import { nodeGlobalSearchHandler, nodeNotificationsHandler } from "./src/lib/git
 const apiDevPlugin: Plugin = {
   name: "api-dev-routes",
   configureServer(server) {
+    server.middlewares.use("/api/manage-repository", nodeRepositoryManagement);
     server.middlewares.use("/api/repos/detail", async (req, res) => {
       await nodeRepoDetailHandler(req, res);
     });

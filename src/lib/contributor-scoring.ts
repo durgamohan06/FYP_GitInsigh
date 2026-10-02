@@ -41,8 +41,11 @@ export function calculateContributorScore(activity: ContributorActivity): number
   const activeTypes = Object.values(counts).filter((count) => count > 0).length;
   if (activeTypes === 0) return 0;
 
-  const activityPoints = (Object.keys(ACTIVITY_WEIGHTS) as Array<keyof typeof ACTIVITY_WEIGHTS>).reduce(
-    (total, type) => total + ACTIVITY_WEIGHTS[type] * diminishingReturn(counts[type], SATURATION_SCALES[type]),
+  const activityPoints = (
+    Object.keys(ACTIVITY_WEIGHTS) as Array<keyof typeof ACTIVITY_WEIGHTS>
+  ).reduce(
+    (total, type) =>
+      total + ACTIVITY_WEIGHTS[type] * diminishingReturn(counts[type], SATURATION_SCALES[type]),
     0,
   );
   const diversityPoints = (activeTypes / Object.keys(ACTIVITY_WEIGHTS).length) * 20;

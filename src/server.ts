@@ -1,3 +1,4 @@
+import { handleRepositoryManagement } from "./lib/repository-management";
 import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
@@ -62,6 +63,9 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
+
+      if (url.pathname === "/api/manage-repository")
+        return await handleRepositoryManagement(request);
 
       if (url.pathname === "/api/repos/detail") {
         return await handleGetRepoDetail(request);

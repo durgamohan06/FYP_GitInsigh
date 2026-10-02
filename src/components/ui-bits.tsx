@@ -11,7 +11,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-2xl bg-card border border-border shadow-sm ${lift ? "card-lift" : ""} ${className}`}
+      className={`ui-card rounded-2xl bg-card border border-border shadow-sm ${lift ? "card-lift" : ""} ${className}`}
     >
       {children}
     </div>

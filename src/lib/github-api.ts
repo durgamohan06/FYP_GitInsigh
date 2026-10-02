@@ -151,7 +151,6 @@ export async function fetchGitHubUserRepos(token: string): Promise<{
   const rawOwned = ownedRes.ok ? ((await ownedRes.json()) as any[]) : [];
   let rawCollab = collabRes.ok ? ((await collabRes.json()) as any[]) : [];
 
-
   const ownedRepos: SimplifiedRepo[] = rawOwned.map((r) => formatRepo(r, false));
   const collaboratedRepos: SimplifiedRepo[] = rawCollab.map((r) => formatRepo(r, true));
 

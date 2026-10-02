@@ -1,3 +1,4 @@
+import { CreateRepository } from "@/components/create-repository";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { AppShell, PageHeader } from "@/components/app-shell";
@@ -104,7 +105,8 @@ function Repositories() {
   };
 
   useEffect(() => {
-    const savedToken = typeof window !== "undefined" ? localStorage.getItem("github_token") || "" : "";
+    const savedToken =
+      typeof window !== "undefined" ? localStorage.getItem("github_token") || "" : "";
     if (savedToken) setCustomToken(savedToken);
     fetchRepositories(savedToken);
   }, []);
@@ -174,7 +176,8 @@ function Repositories() {
             : "All GitHub repositories connected to GitInsight AI via GitHub REST API."
         }
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <CreateRepository onCreated={() => void fetchRepositories()} />
             <Button variant="secondary" onClick={() => setShowTokenInput((v) => !v)}>
               <Key className="h-4 w-4" /> {customToken ? "Update Token" : "Set Token"}
             </Button>
@@ -296,7 +299,9 @@ function Repositories() {
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
-                  window.dispatchEvent(new CustomEvent("gitinsight-repository-search", { detail: e.target.value }));
+                  window.dispatchEvent(
+                    new CustomEvent("gitinsight-repository-search", { detail: e.target.value }),
+                  );
                 }}
                 placeholder="Filter repositories by name, owner, or description…"
                 className="w-full h-10 pl-9 pr-3 rounded-lg bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-brand/40"

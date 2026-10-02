@@ -170,7 +170,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="premium-workspace min-h-screen bg-background text-foreground" data-page={path}>
       {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform lg:translate-x-0 ${
@@ -187,11 +187,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <button
             className="ml-auto lg:hidden text-muted-foreground"
+            aria-label="Close navigation"
             onClick={() => setOpen(false)}
           >
             <X className="h-5 w-5" />
           </button>
         </div>
+        <div className="workspace-nav-label">Workspace</div>
         <nav className="p-3 space-y-1">
           {nav.map((item) => {
             const active =
@@ -201,6 +203,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={item.to}
                 to={item.to}
+                aria-current={active ? "page" : undefined}
                 onClick={() => setOpen(false)}
                 className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                   active
@@ -237,7 +240,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="lg:pl-64">
         <header className="sticky top-0 z-20 h-16 border-b border-border bg-background/70 backdrop-blur-xl">
           <div className="h-full flex items-center gap-3 px-4 lg:px-8">
-            <button className="lg:hidden" onClick={() => setOpen(true)}>
+            <button className="lg:hidden" aria-label="Open navigation" onClick={() => setOpen(true)}>
               <Menu className="h-5 w-5" />
             </button>
             <Link
@@ -338,7 +341,7 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="studio-page-header mb-6 flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
         <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">{title}</h1>
         {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
