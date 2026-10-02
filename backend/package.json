@@ -1,0 +1,26 @@
+{
+  "name": "gitinsight-ai-backend",
+  "version": "1.0.0",
+  "description": "GitInsight AI — Express API Backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/app.ts",
+    "start": "node dist/app.js",
+    "build": "tsc",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.16.5",
+    "eslint": "^9.32.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.3"
+  }
+}

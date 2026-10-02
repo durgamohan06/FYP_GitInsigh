@@ -1,5 +1,5 @@
 import { extractGitHubToken, fetchGitHubUserRepos, type SimplifiedRepo } from "./github-api";
-import { getEnv } from "./env";
+import { getEnv } from "../config/env";
 
 export interface DashboardMetricStat {
   label: string;

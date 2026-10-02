@@ -1,5 +1,5 @@
 import { extractGitHubToken } from "./github-api";
-import { getEnv } from "./env";
+import { getEnv } from "../config/env";
 
 export interface GitHubUserProfile {
   id: number;
@@ -142,6 +142,7 @@ export async function handleGitHubCallback(request: Request): Promise<Response> 
 
     // Store in cookie and sync with localStorage via HTML bridge
     const cookie = `github_token=${accessToken}; Path=/; SameSite=Lax; Max-Age=2592000`; // 30 days
+    const frontendUrl = getEnv("FRONTEND_URL", "http://localhost:8080").replace(/\/$/, "");
     const htmlBridge = `<!DOCTYPE html>
 <html>
 <head>
@@ -163,7 +164,7 @@ export async function handleGitHubCallback(request: Request): Promise<Response> 
       localStorage.setItem("github_token", ${JSON.stringify(accessToken)});
       localStorage.setItem("github_user", ${JSON.stringify(JSON.stringify(userProfile))});
     } catch(e) { console.error(e); }
-    window.location.href = "/dashboard";
+    window.location.href = ${JSON.stringify(`${frontendUrl}/dashboard`)};
   </script>
 </body>
 </html>`;
