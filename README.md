@@ -1,338 +1,255 @@
-# GitInsight AI — AI-Powered GitHub Project Intelligence Dashboard
+# GitInsight AI
 
-<div align="center">
+> AI-Powered GitHub Project Intelligence Dashboard for Engineering Teams
 
-![GitInsight AI](public/favicon.png)
-
-**An intelligent engineering leadership platform and AI-powered project dashboard that turns GitHub activity into real-time analytics, automated summaries, blocker detection, and voice-assisted intelligence.**
-
-[![React](https://img.shields.io/badge/React-19.2-blue?logo=react)](https://react.dev/)
-[![TanStack Start](https://img.shields.io/badge/TanStack-Start%20%2F%20Router-orange?logo=tanstack)](https://tanstack.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS%20v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?logo=typescript)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-
-</div>
+GitInsight AI transforms your GitHub activity into actionable intelligence — tracking commits, PRs, issues, team performance, and project health in real-time.
 
 ---
 
-## 📖 Table of Contents
-
-- [Overview](#-overview)
-- [Tech Stack & Architecture](#-tech-stack--architecture)
-- [Frontend Pages & UI Components](#-frontend-pages--ui-components)
-  - [1. Landing & Gateway Page (`/`)](#1-landing--gateway-page-)
-  - [2. Executive Dashboard (`/dashboard`)](#2-executive-dashboard-dashboard)
-  - [3. Repositories Directory (`/repositories`)](#3-repositories-directory-repositories)
-  - [4. Repository Deep-Dive (`/repositories/:id`)](#4-repository-deep-dive-repositoriesid)
-  - [5. AI Insights Engine (`/ai-insights`)](#5-ai-insights-engine-ai-insights)
-  - [6. AI Voice Assistant (`/voice`)](#6-ai-voice-assistant-voice)
-  - [7. Team Analytics (`/team`)](#7-team-analytics-team)
-  - [8. Intelligence Reports (`/reports`)](#8-intelligence-reports-reports)
-  - [9. Settings & Configurations (`/settings`)](#9-settings--configurations-settings)
-- [GitHub Integration Architecture](#-github-integration-architecture)
-  - [OAuth 2.0 Flow](#github-oauth-20-authentication)
-  - [Dual-Affiliation Repository Fetching](#dual-affiliation-repository-fetching-owned--collaborated)
-  - [Live Dashboard Aggregation](#live-dashboard-aggregation-get-apidashboard)
-- [Backend API Endpoints](#-backend-api-endpoints)
-- [Environment Setup](#-environment-setup)
-- [Getting Started](#-getting-started)
-- [Project Structure](#-project-structure)
-
----
-
-## 🌟 Overview
-
-**GitInsight AI** addresses the common software coordination bottleneck where engineering managers and teams spend substantial time manually tracking GitHub commits, PR reviews, and standup blockers.
-
-The platform connects to the GitHub REST API and OAuth 2.0 to provide:
-
-- **Instant Project Visibility**: Real-time project health scoring, commit velocity, and module completion tracking.
-- **Collaborator & Owned Repository Separation**: Distinguishes between repositories created by the user and projects where the user is an invited collaborator.
-- **AI Blocker Detection**: Flagging stale PRs, open issue backlogs, and delayed releases before they block progress.
-- **Voice Assistant**: An interactive voice/chat interface allowing leaders to ask natural language questions like _"What was completed today?"_ or _"Which PRs are pending?"_.
-- **Developer Analytics**: Contributor velocity scorecards, skill radar charts, and work distribution graphs.
-
----
-
-## 🛠️ Tech Stack & Architecture
-
-- **Full-Stack Framework**: [TanStack Start](https://tanstack.com/start) with [TanStack Router](https://tanstack.com/router) (file-based routing with SSR support).
-- **Core Frontend**: [React 19](https://react.dev/), [Tailwind CSS v4](https://tailwindcss.com/), and [Radix UI](https://www.radix-ui.com/) component primitives.
-- **Data Visualization**: [Recharts](https://recharts.org/) (Area charts, Bar charts, Pie charts, Radar charts, Line charts), custom SVG Sparklines, and circular progress gauges.
-- **Icons & Styling**: [Lucide React](https://lucide.dev/), Glassmorphism cards, animated mesh gradients, and light/dark theme switching.
-- **Backend & SSR**: Node.js, [Nitro](https://nitro.unjs.io/) server entry, and Web Fetch standard API request handlers.
-- **Authentication**: GitHub OAuth 2.0 with HTTP-only cookies and browser session sync.
-
----
-
-## 📱 Frontend Pages & UI Components
-
-### 1. Landing & Gateway Page (`/`)
-
-- **File:** `src/routes/index.tsx`
-- **Features:**
-  - Modern hero section with animated ambient gradient blobs.
-  - **"Continue with GitHub"** button triggering the full OAuth 2.0 authorization flow.
-  - Direct **"Demo Dashboard"** link for instant evaluation.
-  - Responsive glassmorphism card layout with security disclaimers.
-
----
-
-### 2. Executive Dashboard (`/dashboard`)
-
-- **File:** `src/routes/dashboard.tsx`
-- **Features:**
-  - **Personalized Header**: Dynamic greeting with the authenticated user's name (`Good Morning, @User 👋`).
-  - **Project Health Score**: Animated circular progress ring showing overall multi-repository health (computed from open issues, stale PRs, and recent commit velocity).
-  - **Metric Stat Cards**: 6 cards with sparklines displaying Repositories, Commits (30d), Open Issues, Open PRs, Active Contributors, and AI Blockers.
-  - **Activity Area Chart**: 30-day interactive area chart tracking Commits vs. PR volume.
-  - **Contribution Heatmap**: 26-week GitHub-style activity grid.
-  - **Monitored Repositories Table**: Tabular overview with direct links to repository drill-downs.
-
----
-
-### 3. Repositories Directory (`/repositories`)
-
-- **File:** `src/routes/repositories.tsx`
-- **Features:**
-  - **3-Tab Affiliation Segmentation**:
-    - 📁 **All Repositories**: Complete list of connected repositories.
-    - 👤 **My Owned Repos**: Repositories created directly by the user.
-    - 🤝 **Collaborated Repos**: Repositories where the user has been invited as a collaborator (e.g. `durgamohan06/Git-fyp`), styled with a purple **Collaborator** badge and owner avatar.
-  - **Dynamic Search & Filtering**: Real-time filtering by repository name, owner, description, and programming languages.
-  - **Loading Skeletons**: Smooth animated placeholder cards while fetching data.
-  - **Token Modal**: Quick-configure personal access token directly in the browser for flexible testing.
-  - **Repo Cards**: Shows repo visibility (Public/Private), language badge, star count, fork count, default branch, and relative update time.
-
----
-
-### 4. Repository Deep-Dive (`/repositories/:id`)
-
-- **File:** `src/routes/repositories.$id.tsx`
-- **Features:**
-  - **8-Tab Navigation Workspace**:
-    1. **Overview**: High-level repository metrics and quick actions (Star, Fork, View on GitHub).
-    2. **Commits**: Recent commit activity timeline.
-    3. **Issues**: Issue tracking with status tags (Open, Closed, In Progress).
-    4. **Pull Requests**: Open and merged PR tracker.
-    5. **Reviews**: Code review velocity and reviewer assignments.
-    6. **Contributors**: Contributor list with productivity scores (A+, A, B+).
-    7. **Analytics**: 30-day commit vs. PR trend chart.
-    8. **AI Summary**: Automated daily/weekly digests, risk analysis, and recommended next actions.
-
----
-
-### 5. AI Insights Engine (`/ai-insights`)
-
-- **File:** `src/routes/ai-insights.tsx`
-- **Features:**
-  - **Executive Brief**: AI-generated cross-repository summary highlighting high-priority deliverables.
-  - **Categorized Intelligence Cards**:
-    - _Daily, Weekly, and Sprint Velocity Summaries_.
-    - _Risk Analysis_ & _Release Shipping Predictions_ (with confidence scores).
-    - _Completed vs. Pending Task Breakdown_.
-    - _Recommended Actions_ (e.g. review reassignments, backfill splitting).
-
----
-
-### 6. AI Voice Assistant (`/voice`)
-
-- **File:** `src/routes/voice.tsx`
-- **Features:**
-  - **Interactive Voice Interface**: Microphone button with pulsing rings and animated audio equalizer wave.
-  - **Conversational Chat**: Clean chat stream with voice playback support.
-  - **Quick Suggestion Chips**:
-    - _"What was completed today?"_
-    - _"Which pull requests are pending?"_
-    - _"Who is working on Authentication?"_
-    - _"Show inactive contributors."_
-    - _"Which module has blockers?"_
-
----
-
-### 7. Team Analytics (`/team`)
-
-- **File:** `src/routes/team.tsx`
-- **Features:**
-  - **Contributor Scorecards**: Individual productivity metrics (Commits, Closed Issues, Reviews) with letter grades.
-  - **Contribution Comparison**: Bar chart comparing commits vs. reviews across developers.
-  - **Issue Distribution**: Donut chart breaking down work into Bugs, Features, Chores, and Docs.
-  - **Skill Radar Chart**: Comparing developer metrics (Delivery, Quality, Reviews, Velocity, Impact) against team averages.
-  - **Project Timeline**: Planned vs. actual progress bar chart.
-
----
-
-### 8. Intelligence Reports (`/reports`)
-
-- **File:** `src/routes/reports.tsx`
-- **Features:**
-  - Pre-built digest templates: _Daily, Weekly, Sprint, and Monthly Reports_.
-  - Multi-format exports: **PDF**, **CSV**, and shareable URLs.
-  - Export download history log.
-
----
-
-### 9. Settings & Configurations (`/settings`)
-
-- **File:** `src/routes/settings.tsx`
-- **Features:**
-  - Configuration cards for GitHub OAuth, AI Model selection (e.g. GPT-4o / Gemini), Theme, Voice Preferences, Notification channels (Slack/Email), and User Profile.
-
----
-
-## 🔐 GitHub Integration Architecture
-
-### GitHub OAuth 2.0 Authentication
+## Architecture
 
 ```
-[ User Clicks "Continue with GitHub" ]
-                  │
-                  ▼
-[ Redirects to GET /api/auth/github ]
-                  │
-                  ▼
-[ GitHub Authorization Screen (scopes: repo, read:user, user:email) ]
-                  │
-                  ▼
-[ Redirects to GET /api/auth/github/callback?code=... ]
-                  │
-                  ▼
-[ Server Exchanges Code for access_token with GitHub ]
-                  │
-                  ▼
-[ Server Fetches User Profile -> Sets 30-Day Cookie -> Syncs localStorage ]
-                  │
-                  ▼
-[ Redirects User to /dashboard with Live Profile & Repositories ]
+fyp_project/
+├── frontend/          ← TanStack Start (React SSR) — Vite, TailwindCSS, shadcn/ui
+├── backend/           ← Express.js API server — GitHub OAuth, REST API
+├── docs/              ← Architecture & API documentation
+├── .gitignore
+├── README.md
+└── package.json       ← Root scripts (dev:frontend, dev:backend)
 ```
 
-### Dual-Affiliation Repository Fetching (Owned & Collaborated)
+**Frontend** communicates with **Backend** via HTTP. During development, Vite proxies all `/api/*` requests to the Express backend automatically.
 
-GitHub's REST API separates repository access levels by `affiliation`:
-
-1. `GET /user/repos?affiliation=owner&sort=updated&per_page=100` $\rightarrow$ Returns repositories authored and owned by the user.
-2. `GET /user/repos?affiliation=collaborator&sort=updated&per_page=100` $\rightarrow$ Returns external repositories where the user has push/pull collaborator access.
-3. **Resilient Token Scope Fallback**: If an OAuth token has restricted third-party organization scope on private collaborator repos, the server automatically queries with the server's `GITHUB_ACCESS_TOKEN` (PAT) to ensure all collaborated projects are retrieved.
-
-### Live Dashboard Aggregation (`GET /api/dashboard`)
-
-The aggregator endpoint combines multi-repo metrics:
-
-- **30-Day Activity Curve**: Aggregates daily commit timestamps and pull request creation events.
-- **Health Score Formula**:
-  $$\text{Health Score} = \text{clamp}\Big(100 - (\text{openIssues} \times 2) - (\text{stalePRs} \times 3) + \text{recentCommits}_{7\text{d}},\, 0,\, 100\Big)$$
-- **Performance Caching**: In-memory 60-second TTL cache with `_t` timestamp cache-busting on manual sync requests.
-
----
-
-## 🔌 Backend API Endpoints
-
-| Method | Endpoint                    | Description                                                             |
-| :----- | :-------------------------- | :---------------------------------------------------------------------- |
-| `GET`  | `/api/auth/github`          | Initiates GitHub OAuth login redirect                                   |
-| `GET`  | `/api/auth/github/callback` | Handles OAuth callback and exchanges code for token                     |
-| `GET`  | `/api/auth/user`            | Fetches authenticated user's GitHub profile                             |
-| `GET`  | `/api/auth/logout`          | Clears authentication cookies and session                               |
-| `GET`  | `/api/repos`                | Fetches owned and collaborated repositories via dual affiliation        |
-| `GET`  | `/api/repos/detail`         | Fetches comprehensive 8-module analytics payload for a specific repo    |
-| `GET`  | `/api/dashboard`            | Aggregates multi-repository metrics, 30-day activity, and health scores |
-
----
-
-## ⚙️ Environment Setup
-
-Create a `.env` file in the project root:
-
-```env
-# GitHub Personal Access Token (for direct PAT testing & collaborator fallback)
-GITHUB_ACCESS_TOKEN=your_personal_access_token_here
-
-# GitHub OAuth App Configuration
-# Create an OAuth App at: https://github.com/settings/developers
-GITHUB_CLIENT_ID=your_github_oauth_client_id
-GITHUB_CLIENT_SECRET=your_github_oauth_client_secret
-GITHUB_CALLBACK_URL=http://localhost:8080/api/auth/github/callback
+```
+Browser
+  ↓
+frontend (Vite — :8080)
+  ↓ /api/* proxy
+backend (Express — :3001)
+  ↓
+GitHub API
 ```
 
-### GitHub OAuth App Setup:
+---
 
-1. Go to **[GitHub Developer Settings -> OAuth Apps](https://github.com/settings/developers)**.
-2. Click **"New OAuth App"**.
-3. Set **Homepage URL**: `http://localhost:8080`
-4. Set **Authorization callback URL**: `http://localhost:8080/api/auth/github/callback`
-5. Copy the **Client ID** and **Client Secret** into your `.env` file.
+## Technology Stack
+
+### Frontend
+| Layer | Technology |
+|-------|-----------|
+| Framework | TanStack Start (React 19, SSR) |
+| Router | TanStack Router (file-based) |
+| State | TanStack Query |
+| UI Components | shadcn/ui + Radix UI |
+| Styling | TailwindCSS v4 |
+| Charts | Recharts |
+| Build | Vite 8 |
+| Language | TypeScript |
+
+### Backend
+| Layer | Technology |
+|-------|-----------|
+| Runtime | Node.js |
+| Framework | Express.js |
+| Language | TypeScript (tsx) |
+| GitHub API | REST v3 |
+| Auth | GitHub OAuth (cookie-based) |
 
 ---
 
-## 🚀 Getting Started
+## Quick Start
 
-### 1. Install Dependencies
+### Prerequisites
+- Node.js 18+
+- npm 9+
+- A GitHub OAuth App ([create one here](https://github.com/settings/developers))
+
+### 1. Clone and install
 
 ```bash
-npm install
+# Install all dependencies
+npm run install:all
+
+# Or install separately:
+cd frontend && npm install
+cd ../backend && npm install
 ```
 
-### 2. Start the Development Server
+### 2. Configure environment variables
 
+**Backend:**
 ```bash
+cd backend
+cp .env.example .env
+# Edit .env with your GitHub OAuth credentials
+```
+
+**Frontend:**
+```bash
+cd frontend
+cp .env.example .env
+# Usually no changes needed for local development
+```
+
+### 3. Run both servers
+
+**Terminal 1 — Backend:**
+```bash
+cd backend
 npm run dev
+# Starts at http://localhost:3001
 ```
 
-### 3. Open in Browser
-
-Visit **[http://localhost:8080](http://localhost:8080)** to preview and use the application.
-
-### 4. Build for Production
-
+**Terminal 2 — Frontend:**
 ```bash
-npm run build
+cd frontend
+npm run dev
+# Starts at http://localhost:8080
+```
+
+Open **http://localhost:8080** in your browser.
+
+---
+
+## Environment Variables
+
+### Backend (`backend/.env`)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITHUB_CLIENT_ID` | Yes | GitHub OAuth App Client ID |
+| `GITHUB_CLIENT_SECRET` | Yes | GitHub OAuth App Client Secret |
+| `GITHUB_CALLBACK_URL` | Yes | OAuth callback URL (e.g., `http://localhost:8080/api/auth/github/callback`) |
+| `GITHUB_ACCESS_TOKEN` | No | Personal access token (for testing) |
+| `PORT` | No | Backend port (default: 3001) |
+| `FRONTEND_URL` | No | Frontend URL for CORS (default: http://localhost:8080) |
+
+### Frontend (`frontend/.env`)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_API_URL` | No | Backend URL (default: http://localhost:3001, auto-proxied in dev) |
+
+---
+
+## Authentication Setup
+
+1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
+2. Click **"New OAuth App"**
+3. Set:
+   - **Homepage URL**: `http://localhost:8080`
+   - **Authorization callback URL**: `http://localhost:8080/api/auth/github/callback`
+4. Copy the **Client ID** and **Client Secret** into `backend/.env`
+
+The auth flow:
+```
+User clicks "Sign in with GitHub"
+  → Frontend redirects to /api/auth/github
+  → Backend redirects to GitHub OAuth
+  → GitHub redirects to /api/auth/github/callback
+  → Backend exchanges code for token, sets cookie
+  → User redirected to /dashboard
 ```
 
 ---
 
-## 📂 Project Structure
+## API Overview
+
+All API routes are served by the Express backend at `http://localhost:3001`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Health check |
+| GET | `/api/auth/github` | Start GitHub OAuth |
+| GET | `/api/auth/github/callback` | OAuth callback |
+| GET | `/api/auth/user` | Get current user |
+| GET | `/api/auth/logout` | Logout |
+| GET | `/api/repos` | List repositories |
+| GET | `/api/repos/insights` | Repository insights |
+| GET | `/api/repos/detail` | Repository detail analytics |
+| GET | `/api/dashboard` | Dashboard metrics |
+| GET | `/api/team/analytics` | Team analytics |
+| GET | `/api/team/projects` | Contributor projects |
+| GET | `/api/search` | Global search |
+| GET | `/api/notifications` | Notifications |
+
+See [docs/api/README.md](docs/api/README.md) for detailed API documentation.
+
+---
+
+## Development Workflow
+
+```bash
+# From the root of the project:
+
+# Run frontend dev server
+npm run dev:frontend
+
+# Run backend dev server
+npm run dev:backend
+
+# Lint frontend
+npm run lint:frontend
+
+# Build frontend for production
+npm run build:frontend
+```
+
+---
+
+## Project Structure (Detailed)
 
 ```
-Git-fyp-main/
-├── src/
-│   ├── components/
-│   │   ├── app-shell.tsx         # Sidebar, dynamic user header, avatar, logout & theme toggle
-│   │   ├── ui-bits.tsx           # Reusable cards, badges, count-up animations, gauges, sparklines
-│   │   └── ui/                   # Radix UI primitives (modals, dropdowns, tooltips, dialogs)
-│   ├── routes/
-│   │   ├── __root.tsx            # Root HTML layout, QueryClient provider & error boundaries
-│   │   ├── index.tsx             # Landing page with GitHub OAuth login trigger
-│   │   ├── dashboard.tsx         # Executive dashboard with live activity charts & metrics
-│   │   ├── repositories.index.tsx# Repository directory with Owned vs Collaborated tabs
-│   │   ├── repositories.$id.tsx  # 8-section repository deep-dive analytics
-│   │   ├── ai-insights.tsx       # AI digests, risk analysis & recommendations
-│   │   ├── voice.tsx             # AI Voice Assistant with soundwave UI
-│   │   ├── team.tsx              # Team productivity scorecards & skill radar
-│   │   ├── reports.tsx           # Report generator (PDF / CSV export)
-│   │   ├── settings.tsx          # System, AI model & notification settings
-│   ├── lib/
-│   │   ├── env.ts                # Zero-dependency .env loader for server & Vite runtimes
-│   │   ├── github-api.ts         # Dual-affiliation repo fetcher (owned & collaborated)
-│   │   ├── repo-detail-api.ts    # Service for fetching 8-module repo analytics payload
-│   │   ├── dashboard-api.ts      # Multi-repository activity & health score aggregator
-│   │   ├── github-oauth.ts       # OAuth 2.0 login, callback, session & user profile handler
-│   │   ├── mock-data.ts          # Static sample dataset for offline fallbacks
-│   │   ├── error-capture.ts      # SSR error capture
-│   │   ├── error-page.ts         # 500 error page fallback renderer
-│   │   └── utils.ts              # Tailwind CSS class merging utilities
-│   ├── server.ts                 # Nitro server entry & SSR API route dispatcher
-│   ├── styles.css                # Tailwind CSS v4 variables & custom animations
-│   ├── routeTree.gen.ts          # Auto-generated TanStack router tree
-│   └── router.tsx                # TanStack Router instance creation
-├── .env.example                  # Environment variables template
-├── vite.config.ts                # Vite build, TanStack Start & API dev middleware plugin
-└── package.json                  # Dependencies & scripts
+fyp_project/
+│
+├── frontend/                    ← React/TanStack Start SPA
+│   ├── src/
+│   │   ├── components/         ← Reusable UI components
+│   │   │   ├── ui/             ← shadcn/ui components
+│   │   │   ├── app-shell.tsx   ← Main layout (sidebar + nav)
+│   │   │   └── ui-bits.tsx     ← Custom reusable components
+│   │   ├── hooks/              ← Custom React hooks
+│   │   ├── lib/                ← Import shims for backward compatibility
+│   │   ├── routes/             ← Page components (file-based routing)
+│   │   ├── services/           ← Browser-side services & API clients
+│   │   ├── types/              ← TypeScript interfaces (frontend-safe)
+│   │   ├── utils/              ← Utility functions
+│   │   ├── router.tsx          ← Router factory
+│   │   ├── start.ts            ← TanStack Start entry
+│   │   ├── server.ts           ← SSR entry (no API logic)
+│   │   └── styles.css          ← Global styles
+│   ├── public/
+│   ├── vite.config.ts          ← Vite + proxy config
+│   ├── tsconfig.json
+│   ├── package.json
+│   └── .env.example
+│
+├── backend/                     ← Express REST API
+│   ├── src/
+│   │   ├── app.ts              ← Express application entry
+│   │   ├── config/             ← Environment config
+│   │   ├── routes/             ← Express route definitions
+│   │   ├── services/           ← GitHub API business logic
+│   │   ├── middleware/         ← Auth, error handling
+│   │   ├── utils/              ← Utilities & adapters
+│   │   └── types/              ← Shared TypeScript types
+│   ├── tsconfig.json
+│   ├── package.json
+│   └── .env.example
+│
+├── docs/
+│   ├── architecture/           ← System design docs
+│   ├── api/                    ← API reference docs
+│   └── setup/                  ← Setup guides
+│
+├── .gitignore
+├── README.md
+└── package.json                 ← Root scripts only
 ```
 
 ## GitHub OAuth: local development and production
 
-OAuth credentials are read on the server through `getEnv` in `src/lib/env.ts`.
+OAuth credentials are read on the server through `getEnv` in `backend/src/config/env.ts`.
 The server reads `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and
 `GITHUB_CALLBACK_URL`. Existing process environment values take precedence over
 `.env`. Credentials must never use a `VITE_` prefix or be placed in client code.
@@ -347,7 +264,7 @@ and callback routes return a styled HTML setup screen (HTTP 503) when credential
 are missing, blank, or still use the template placeholders. The screen links to
 `/#preview` and home; the preview is illustrative, not an authenticated dashboard.
 
-1. Copy `.env.example` to `.env` in the project root.
+1. Copy `backend/.env.example` to `backend/.env`.
 2. Create your own GitHub OAuth App in GitHub Developer Settings.
 3. Set its homepage to `http://localhost:8080` and callback URL to
    `http://localhost:8080/api/auth/github/callback`.
@@ -383,7 +300,9 @@ in browser storage, and the optional server `GITHUB_ACCESS_TOKEN` fallback remai
 Do not configure a shared personal token for a public multi-user deployment without
 reviewing its access implications. These legacy features are not OAuth credentials.
 
-Run `node --test tests/oauth.test.cjs`, `npx tsc --noEmit`, and `npm run build`.
+With Node 22.12+ (Node 24 recommended), install dependencies with `npm install`
+and `npm run install:all`. Run `npm run typecheck`, `npm run build`, then
+`npm test`. Tests exercise the compiled backend, so build it first.
 OAuth tests use mocked GitHub responses; a live authorization round trip requires
 your own configured OAuth App. No real credentials are needed for the tests.
 
@@ -411,3 +330,18 @@ approved-manager registry or organization role provisioning yet.
 
 Run `node --test tests/repository-management.test.cjs` for mocked mutation tests.
 These tests do not create live repositories or send real invitations.
+
+### Frontend/backend integration
+
+Run `npm run dev:backend` and `npm run dev:frontend` in separate terminals.
+The frontend proxies `/api` to the backend on port 3001. Keep `FRONTEND_URL`
+and the OAuth callback origin aligned with the browser URL (normally
+`http://localhost:8080`). The Express adapter uses this configured public origin
+for OAuth and same-origin checks, and forwards each session cookie separately.
+For production, route `/api/*` to Express and other paths to the frontend SSR
+server under the same public HTTPS origin. Vite's development proxy is not a
+production proxy. Set `FRONTEND_URL` to that public origin on the backend.
+
+The repository creation form uses a browser-only validation schema in
+`frontend/src/lib/repository-management-schema.ts`; the backend validates requests
+independently. Keep these schemas aligned when changing the request contract.

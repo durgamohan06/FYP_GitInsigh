@@ -1,19 +1,8 @@
 // Run with: node --test tests/oauth.test.cjs
 const { test, beforeEach, afterEach } = require("node:test");
 const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const ts = require("typescript");
-// Compile the actual server modules, without a live server or GitHub requests.
-require.extensions[".ts"] = (module, filename) => {
-  const { outputText } = ts.transpileModule(fs.readFileSync(filename, "utf8"), {
-    compilerOptions: {
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2022,
-      esModuleInterop: true,
-    },
-  });
-  module._compile(outputText, filename);
-};
+// Exercise the compiled backend without a live GitHub connection (Node 22.12+).
+
 process.env.GITHUB_CLIENT_ID = "";
 process.env.GITHUB_CLIENT_SECRET = "";
 process.env.GITHUB_CALLBACK_URL = "";
@@ -21,7 +10,7 @@ const {
   handleGitHubLogin,
   handleGitHubCallback,
   nodeAuthRouter,
-} = require("../src/lib/github-oauth.ts");
+} = require("../backend/dist/services/github-oauth.js");
 const originalFetch = global.fetch;
 const base = "http://localhost:8080";
 const loginRequest = () => new Request(`${base}/api/auth/github`);
@@ -178,7 +167,7 @@ test("successful callback sets HttpOnly token, clears state, safely serializes p
   assert.match(cookies[1], /Max-Age=0/);
   const html = await response.text();
   assert.doesNotMatch(html, /test-token|<script>alert/);
-  assert.match(html, /window.location.href = "\/dashboard"/);
+  assert.match(html, /window.location.href = "http:\/\/localhost:8080\/dashboard"/);
 });
 test("HTTPS state cookie is secure", () => {
   configure();

@@ -1,9 +1,6 @@
 const { test, afterEach } = require("node:test");
 const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const ts = require("typescript");
-require.extensions[".ts"] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename,"utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true } }).outputText, filename);
-const { handleRepositoryManagement: handle } = require("../src/lib/repository-management.ts");
+const { handleRepositoryManagement: handle } = require("../backend/dist/services/repository-management.js");
 const originalFetch = global.fetch;
 afterEach(() => { global.fetch = originalFetch; });
 const payload = { action: "create", name: "team-project", private: true, members: ["alice", "bob"] };
