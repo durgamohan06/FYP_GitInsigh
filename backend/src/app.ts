@@ -15,6 +15,8 @@ import { teamRoutes } from "./routes/team.js";
 import { searchRoutes } from "./routes/search.js";
 import { notificationsRoutes } from "./routes/notifications.js";
 import { errorHandler } from "./middleware/error-handler.js";
+import { handleRepositoryManagement } from "./services/repository-management.js";
+import { adaptWebHandler } from "./utils/adapt-web-handler.js";
 
 const app = express();
 const PORT = parseInt(process.env.PORT ?? "3001", 10);
@@ -38,6 +40,7 @@ app.use(express.json());
 // ── API Routes ────────────────────────────────────────────────────────────────
 
 app.use("/api/auth", authRoutes);
+app.all("/api/manage-repository", adaptWebHandler(handleRepositoryManagement));
 app.use("/api/repos", reposRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/team", teamRoutes);

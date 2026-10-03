@@ -31,7 +31,7 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function Dashboard() {
-  const [userName, setUserName] = useState("Durga");
+  const [userName, setUserName] = useState("");
   const [data, setData] = useState<DashboardDataResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -108,21 +108,45 @@ function Dashboard() {
   return (
     <AppShell>
       <PageHeader
-        title={`Good Morning, ${userName} 👋`}
-        subtitle="Here's what's happening across your GitHub projects today."
+        title="Workspace overview"
+        subtitle="A clearer perspective on everything you're building."
         actions={
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => fetchDashboardData(true)} disabled={loading}>
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Sync now
             </Button>
-            <Link to="/repositories">
-              <Button>
-                <Plus className="h-4 w-4" /> View Repositories
-              </Button>
+            <Link to="/repositories" className="dashboard-primary-link">
+                <Plus className="h-4 w-4" /> Repositories
             </Link>
           </div>
         }
       />
+
+      <section className="dashboard-hero" aria-labelledby="dashboard-welcome">
+        <div className="hero-copy">
+          <div className="dashboard-eyebrow"><span /> YOUR ENGINEERING WORKSPACE</div>
+          <h2 id="dashboard-welcome">The bigger picture.<br /><em>Every detail, in focus.</em></h2>
+          <p>{userName ? `Welcome back, ${userName.split(" ")[0]}. ` : "Welcome to GitInsight. "}Follow your team's momentum, spot what needs attention, and keep your next release moving.</p>
+          <div className="hero-footer">
+            <Link to="/reports">Explore reports <Icons.ArrowUpRight size={15} /></Link>
+            <span className="hero-status"><span className={data && !error ? "status-dot connected" : "status-dot"} />{loading ? "Syncing workspace" : error ? "Sync unavailable" : data ? `${data.totalRepos} repositories connected` : "Awaiting connection"}</span>
+          </div>
+        </div>
+        <div className="orbit-scene" aria-hidden="true">
+          <div className="orbit-grid" />
+          <div className="orbit-shadow" />
+          <div className="orbit-sculpture">
+            <div className="orbit-ring orbit-ring-one" />
+            <div className="orbit-ring orbit-ring-two" />
+            <div className="orbit-ring orbit-ring-three" />
+            <div className="orbit-core"><GitBranch size={36} strokeWidth={1.3} /></div>
+          </div>
+          <div className="orbit-label orbit-label-top"><Icons.GitCommitHorizontal size={15} /><span>Code. Connect. Create.</span></div>
+          <div className="orbit-label orbit-label-bottom"><span className="orbit-label-dot" />A new perspective on progress</div>
+          <span className="orbit-coordinate">GITINSIGHT / WORKSPACE 01</span>
+        </div>
+      </section>
+      <div className="dashboard-section-label"><span>Performance at a glance</span><span>YOUR GITHUB ACTIVITY</span></div>
 
       {/* Error state banner */}
       {error && !loading && (
@@ -131,7 +155,7 @@ function Dashboard() {
             <AlertCircle className="h-6 w-6" />
           </div>
           <h3 className="text-base font-semibold text-foreground">
-            Failed to Load Live GitHub Data
+            Your workspace couldn't sync
           </h3>
           <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1 mb-4">{error}</p>
           <Button onClick={() => fetchDashboardData()}>
@@ -170,10 +194,10 @@ function Dashboard() {
 
       {/* Live Data Render */}
       {data && (
-        <>
-          <div className="grid gap-6 lg:grid-cols-3">
+        <div className="dashboard-sections">
+          <div className="overview-grid grid gap-6 lg:grid-cols-3">
             {/* Health Score Gauge */}
-            <Card className="p-6 lg:col-span-1 flex flex-col items-center justify-center">
+            <Card className="health-card p-6 lg:col-span-1 flex flex-col items-center justify-center">
               <div className="text-sm text-muted-foreground mb-2">Project Health Score</div>
               <CircularProgress
                 value={data.healthScore}
@@ -202,7 +226,7 @@ function Dashboard() {
                       ? "→ Needs Review"
                       : "↓ Critical"}
                 </Badge>
-                <Badge tone="brand">AI verified</Badge>
+                <Badge tone="brand">Repository signals</Badge>
               </div>
             </Card>
 
@@ -212,7 +236,7 @@ function Dashboard() {
                 const Icon = (Icons as any)[s.icon] ?? Icons.Activity;
                 const up = s.trend >= 0;
                 return (
-                  <Card key={s.label} className="p-5">
+                  <Card key={s.label} className="metric-card p-5">
                     <div className="flex items-start justify-between">
                       <div className="h-9 w-9 rounded-xl bg-brand/10 grid place-items-center text-brand">
                         <Icon className="h-4 w-4" />
@@ -235,7 +259,7 @@ function Dashboard() {
           </div>
 
           {/* Module Progress & AI Blockers */}
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+          <div className="projects-grid mt-6 grid gap-6 lg:grid-cols-3">
             <Card className="p-6 lg:col-span-2">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -268,11 +292,12 @@ function Dashboard() {
             </Card>
 
             <Card className="p-6">
-              <div className="font-semibold mb-1">AI Blockers</div>
+              <div className="font-semibold mb-1">Needs attention</div>
               <div className="text-xs text-muted-foreground mb-4">
                 Detected in your repositories
               </div>
               <div className="space-y-3">
+                {data.blockers.length === 0 && <div className="dashboard-empty"><Icons.CheckCircle2 size={24} /><p>No blockers detected.</p><span>Your repositories are clear for now.</span></div>}
                 {data.blockers.map((b, idx) => (
                   <div
                     key={idx}
@@ -301,7 +326,7 @@ function Dashboard() {
           </div>
 
           {/* 30-Day Activity Chart & Heatmap */}
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+          <div className="activity-grid mt-6 grid gap-6 lg:grid-cols-3">
             <Card className="p-6 lg:col-span-2">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -382,7 +407,7 @@ function Dashboard() {
               <div className="font-semibold mb-1">Contribution Heatmap</div>
               <div className="text-xs text-muted-foreground mb-4">Last 26 weeks</div>
               <div className="flex gap-1 overflow-x-auto pb-2">
-                {data.heatmap[0].map((_, col) => (
+                {(data.heatmap[0] ?? []).map((_, col) => (
                   <div key={col} className="flex flex-col gap-1">
                     {data.heatmap.map((row, rowIdx) => {
                       const v = row[col];
@@ -413,7 +438,7 @@ function Dashboard() {
           </div>
 
           {/* Monitored Repositories Table */}
-          <Card className="mt-6 p-0 overflow-hidden">
+          <Card className="repositories-card mt-6 p-0 overflow-hidden">
             <div className="p-6 flex items-center justify-between">
               <div>
                 <div className="font-semibold">Repositories</div>
@@ -484,7 +509,7 @@ function Dashboard() {
               </table>
             </div>
           </Card>
-        </>
+        </div>
       )}
     </AppShell>
   );

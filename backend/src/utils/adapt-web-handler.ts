@@ -16,7 +16,9 @@ export function adaptWebHandler(
     // Build Web API Request from Express req
     const protocol = req.protocol ?? "http";
     const host = req.headers.host ?? "localhost:3001";
-    const fullUrl = `${protocol}://${host}${req.originalUrl}`;
+    // Use the configured public origin behind the frontend proxy, never a client-supplied forwarded host.
+    const publicOrigin = new URL(process.env.FRONTEND_URL || `${protocol}://${host}`).origin;
+    const fullUrl = `${publicOrigin}${req.originalUrl}`;
 
     const webReq = new globalThis.Request(fullUrl, {
       method: req.method,
@@ -30,12 +32,15 @@ export function adaptWebHandler(
     res.status(webRes.status);
 
     // Forward headers (except ones Express manages)
-    const skipHeaders = new Set(["content-encoding", "transfer-encoding"]);
+    const skipHeaders = new Set(["content-encoding", "transfer-encoding", "set-cookie"]);
     webRes.headers.forEach((value, key) => {
       if (!skipHeaders.has(key.toLowerCase())) {
         res.setHeader(key, value);
       }
     });
+
+    const cookies = webRes.headers.getSetCookie();
+    if (cookies.length) res.setHeader("Set-Cookie", cookies);
 
     // Forward body
     const contentType = webRes.headers.get("content-type") ?? "";

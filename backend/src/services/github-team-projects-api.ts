@@ -1,4 +1,4 @@
-import { extractGitHubToken, type SimplifiedRepo } from "./github-api";
+import { extractGitHubToken, type SimplifiedRepo } from "./github-api.js";
 import type {
   ContributorProject,
   MemberProjectSummary,

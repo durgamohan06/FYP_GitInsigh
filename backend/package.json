@@ -8,12 +8,14 @@
     "dev": "tsx watch src/app.ts",
     "start": "node dist/app.js",
     "build": "tsc",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

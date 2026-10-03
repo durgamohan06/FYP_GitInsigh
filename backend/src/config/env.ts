@@ -10,13 +10,19 @@ let envLoaded = false;
  * Loads .env variables into process.env from the backend root.
  */
 export function loadProjectEnv(): void {
-  if (typeof process === "undefined" || !process.cwd) return;
   if (envLoaded) return;
+  if (typeof process === "undefined" || !process.cwd) return;
+  envLoaded = true;
 
   try {
-    // Look for .env in the backend directory (one level up from src/config/)
-    const envPath = path.resolve(__dirname, "../../.env");
-    if (!fs.existsSync(envPath)) return;
+    // Resolve from both the backend working directory and the compiled module.
+    // This keeps local tsx watch and production dist execution consistent.
+    const candidates = [
+      path.resolve(process.cwd(), ".env"),
+      path.resolve(__dirname, "../../.env"),
+    ];
+    const envPath = candidates.find((candidate) => fs.existsSync(candidate));
+    if (!envPath) return;
 
     const content = fs.readFileSync(envPath, "utf-8");
     const lines = content.split(/\r?\n/);
@@ -39,9 +45,12 @@ export function loadProjectEnv(): void {
         value = value.slice(1, -1);
       }
 
-      process.env[key] = value;
+      // Hosting platforms inject production secrets before the app starts. A
+      // developer's .env file must never replace those values.
+      if (process.env[key] === undefined || process.env[key] === "") {
+        process.env[key] = value;
+      }
     }
-    envLoaded = true;
   } catch (err) {
     console.error("Failed to load .env:", err);
   }

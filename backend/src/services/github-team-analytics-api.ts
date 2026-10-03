@@ -1,5 +1,5 @@
-import { extractGitHubToken } from "./github-api";
-import { calculateContributorScore } from "../utils/contributor-scoring";
+import { extractGitHubToken } from "./github-api.js";
+import { calculateContributorScore } from "../utils/contributor-scoring.js";
 
 export interface TeamAnalyticsApiData {
   repository: {

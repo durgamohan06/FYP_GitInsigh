@@ -9,7 +9,7 @@ import { extractGitHubToken } from "../services/github-api.js";
 export function extractToken(req: Request, _res: Response, next: NextFunction): void {
   // Adapt the Request object to match the Web API-style Request expected by existing services
   const webRequest = buildWebRequest(req);
-  const token = extractGitHubToken(webRequest as unknown as Request);
+  const token = extractGitHubToken(webRequest);
   (req as any).githubToken = token;
   next();
 }
@@ -21,7 +21,8 @@ export function extractToken(req: Request, _res: Response, next: NextFunction): 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const cookieHeader = req.headers["cookie"] ?? "";
   const cookieToken = getCookieValue(cookieHeader, "github_token");
-  const authHeader = req.headers["authorization"] ?? req.headers["x-github-token"] ?? "";
+  const header = req.headers["authorization"] ?? req.headers["x-github-token"] ?? "";
+  const authHeader = Array.isArray(header) ? header[0] || "" : header;
   const token = cookieToken ?? (authHeader ? authHeader.replace(/^Bearer\s+/i, "") : null);
 
   if (!token) {
@@ -39,16 +40,10 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
  * Builds a Web API-style Request object from an Express req
  * so we can reuse the existing service functions unchanged.
  */
-export function buildWebRequest(req: Request): { headers: { get: (key: string) => string | null }; url: string; method: string } {
-  return {
-    url: `http://${req.headers.host}${req.url}`,
-    method: req.method,
-    headers: {
-      get: (key: string) => {
-        const val = req.headers[key.toLowerCase()];
-        if (Array.isArray(val)) return val.join(", ");
-        return val ?? null;
-      },
-    },
-  };
+export function buildWebRequest(req: Request): globalThis.Request {
+  const headers = new Headers();
+  for (const [key, value] of Object.entries(req.headers)) {
+    if (value !== undefined) headers.set(key, Array.isArray(value) ? value.join(", ") : value);
+  }
+  return new globalThis.Request(`${req.protocol}://${req.headers.host}${req.originalUrl || req.url}`, { method: req.method, headers });
 }

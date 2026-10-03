@@ -9,6 +9,12 @@
     "install:all": "cd frontend && npm install && cd ../backend && npm install",
     "build:frontend": "cd frontend && npm run build",
     "lint:frontend": "cd frontend && npm run lint",
-    "lint:backend": "cd backend && npm run lint"
+    "lint:backend": "cd backend && npm run lint",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "typecheck": "npm --prefix backend run typecheck && npm --prefix frontend run typecheck",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
   }
 }

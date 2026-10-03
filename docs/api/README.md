@@ -2,7 +2,7 @@
 
 ## Base URL
 
-**Development:** `http://localhost:3001`  
+**Development:** `http://localhost:3001`
 **Production:** Your deployed backend URL
 
 All API routes are prefixed with `/api`.

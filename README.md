@@ -246,3 +246,102 @@ fyp_project/
 ├── README.md
 └── package.json                 ← Root scripts only
 ```
+
+## GitHub OAuth: local development and production
+
+OAuth credentials are read on the server through `getEnv` in `backend/src/config/env.ts`.
+The server reads `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and
+`GITHUB_CALLBACK_URL`. Existing process environment values take precedence over
+`.env`. Credentials must never use a `VITE_` prefix or be placed in client code.
+The client ID is public by design in GitHub's authorization URL; the client secret
+is sent only by the server to GitHub's token endpoint. `.gitignore` excludes `.env`
+and environment variants, while `.env.example` contains placeholders only.
+
+### Developers cloning without .env
+
+The landing page and its sample preview work without OAuth configuration. Login
+and callback routes return a styled HTML setup screen (HTTP 503) when credentials
+are missing, blank, or still use the template placeholders. The screen links to
+`/#preview` and home; the preview is illustrative, not an authenticated dashboard.
+
+1. Copy `backend/.env.example` to `backend/.env`.
+2. Create your own GitHub OAuth App in GitHub Developer Settings.
+3. Set its homepage to `http://localhost:8080` and callback URL to
+   `http://localhost:8080/api/auth/github/callback`.
+4. Fill in `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`, and set
+   `GITHUB_CALLBACK_URL` to the same callback URL.
+5. Restart the server and open `http://localhost:8080`. If using `127.0.0.1` or a
+   different port, update both callback settings and open the matching origin.
+
+### End users on a production deployment
+
+The site operator configures the OAuth credentials in the hosting platform's
+server environment and registers the public HTTPS callback URL, for example
+`https://your-domain.example/api/auth/github/callback`. Start the deployment with
+those variables available to the server. End users click Log in, authorize on
+GitHub, and return to the dashboard; they do not clone the project, create `.env`,
+or supply a client secret. Missing deployment configuration is the operator's
+responsibility, not the visitor's. Behind a reverse proxy, ensure the application
+receives the public HTTPS request URL so callback origin checks and Secure cookies
+work correctly.
+
+### Audit and validation
+
+Source review found no hardcoded OAuth client ID or client secret. Documentation
+uses placeholders. The audit covers current source, not published Git history or
+external hosting configuration. Both login and callback validate configuration;
+provider failures return HTML without raw upstream details. Sign-in uses a random
+state value in a 10-minute HttpOnly SameSite cookie, verifies it before exchanging
+codes, and clears it after callback processing. OAuth tokens use HttpOnly cookies
+(Secure on HTTPS); they are no longer written to localStorage or embedded in HTML.
+
+The separate manual personal-access-token feature still stores user-entered tokens
+in browser storage, and the optional server `GITHUB_ACCESS_TOKEN` fallback remains.
+Do not configure a shared personal token for a public multi-user deployment without
+reviewing its access implications. These legacy features are not OAuth credentials.
+
+With Node 22.12+ (Node 24 recommended), install dependencies with `npm install`
+and `npm run install:all`. Run `npm run typecheck`, `npm run build`, then
+`npm test`. Tests exercise the compiled backend, so build it first.
+OAuth tests use mocked GitHub responses; a live authorization round trip requires
+your own configured OAuth App. No real credentials are needed for the tests.
+
+## Manager repository setup
+
+Open **Repositories → Create repository**. Enter a name, optional description,
+visibility (private by default), and up to 20 GitHub usernames separated by commas
+or new lines. The app creates an initialized repository under the signed-in
+account and requests write-access invitations. GitHub handles invitation delivery;
+collaborators must accept before joining. Existing collaborators are reported as
+already having access. Invitations are not automatically accepted.
+
+The result lists each invitation independently. **Retry failed invitations** only
+retries failed members and never creates the repository again. To add people later
+or recover after an interrupted request, select **Invite members to an existing
+repository I own**. A failed or interrupted create request may already have reached
+GitHub, so check the repository list before submitting again.
+
+Both development and production use `POST /api/manage-repository`. Mutations
+require a same-origin JSON request and a user token cookie, never the shared server
+PAT fallback. The server resolves the account from GitHub and enforces repository
+ownership; organization-owned repositories are not supported by this flow.
+All signed-in users are treated as managers in this version; there is no separate
+approved-manager registry or organization role provisioning yet.
+
+Run `node --test tests/repository-management.test.cjs` for mocked mutation tests.
+These tests do not create live repositories or send real invitations.
+
+### Frontend/backend integration
+
+Run `npm run dev:backend` and `npm run dev:frontend` in separate terminals.
+The frontend proxies `/api` to the backend on port 3001. Keep `FRONTEND_URL`
+and the OAuth callback origin aligned with the browser URL (normally
+`http://localhost:8080`). The Express adapter uses this configured public origin
+for OAuth and same-origin checks, and forwards each session cookie separately.
+For production, route `/api/*` to Express and other paths to the frontend SSR
+server under the same public HTTPS origin. Vite's development proxy is not a
+production proxy. Set `FRONTEND_URL` to that public origin on the backend.
+
+The repository creation form uses a browser-only validation schema in
+`frontend/src/lib/repository-management-schema.ts`; the backend validates requests
+independently. Keep these schemas aligned when changing the request contract.
