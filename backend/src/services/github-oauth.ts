@@ -169,7 +169,10 @@ function oauthConfiguration(
     )
       return null;
     // The state cookie must return to the same origin that started sign-in.
-    if (redirect.origin !== new URL(request.url).origin) return null;
+    // The API runs on :3001 during development while the browser uses the
+    // frontend on :8080. Validate against the configured public frontend origin.
+    const frontendOrigin = new URL(getEnv("FRONTEND_URL", "http://localhost:8080")).origin;
+    if (redirect.origin !== frontendOrigin) return null;
     return { clientId, clientSecret, redirectUri: redirect.toString() };
   } catch {
     return null;
