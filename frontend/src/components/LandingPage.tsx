@@ -1,0 +1,1371 @@
+
+import { useEffect } from "react";
+import { Link } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
+import TargetCursor from "./TargetCursor";
+import TechText from "./TechText";
+import LogoLoop from "./LogoLoop";
+
+export function LandingPageComponent({ loggingIn, handleGitHubLogin }) {
+  useEffect(() => {
+    // Scroll handling for nav
+    const nav = document.querySelector('.nav');
+    const toggle = document.querySelector('.nav-mobile-toggle');
+    
+    const handleScroll = () => {
+      if (window.pageYOffset > 20) {
+        nav?.classList.add('scrolled');
+      } else {
+        nav?.classList.remove('scrolled');
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Scroll Reveal
+    const reveals = document.querySelectorAll('.reveal, .reveal-scale, .reveal-left, .reveal-right');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+    
+    reveals.forEach(el => observer.observe(el));
+
+    // Dashboard animations
+    const bars = document.querySelectorAll('.hero-dash-bar');
+    const heights = [30, 50, 25, 70, 45, 85, 35, 60, 90, 40, 75, 55, 80, 30, 65, 95, 50, 70, 40, 85];
+    bars.forEach((bar, i) => {
+      if (bar instanceof HTMLElement) bar.style.height = heights[i % heights.length] + '%';
+    });
+    
+    const dashInterval = setInterval(() => {
+      bars.forEach((bar) => {
+        if (bar instanceof HTMLElement) bar.style.height = (Math.random() * 80 + 15) + '%';
+      });
+    }, 4000);
+
+    const chartBars = document.querySelectorAll('.dash-chart-bar');
+    const chartHeights = [40, 65, 30, 80, 55, 95, 45, 70, 35, 85, 60, 50, 75, 90, 40, 55, 70, 80, 45, 65, 30, 85, 50, 95];
+    chartBars.forEach((bar, i) => {
+      if (bar instanceof HTMLElement) bar.style.height = (chartHeights[i % chartHeights.length]) + '%';
+    });
+    
+    const chartInterval = setInterval(() => {
+      chartBars.forEach((bar) => {
+        if (bar instanceof HTMLElement) bar.style.height = (Math.random() * 75 + 20) + '%';
+      });
+    }, 5000);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      observer.disconnect();
+      clearInterval(dashInterval);
+      clearInterval(chartInterval);
+    };
+  }, []);
+
+  return (
+    <div className="landing-page-wrapper">
+      <TargetCursor targetSelector=".cursor-target" cursorColor="#fff" cursorColorOnTarget="#fff" />
+
+{/*  ============================================================
+     NAVIGATION
+     ============================================================  */}
+<nav className="nav" id="nav">
+  <div className="nav-inner">
+    <a href="#" className="nav-logo">
+      <div className="nav-logo-icon">
+        {/*  Git-inspired logo mark  */}
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="13" stroke="#000" strokeWidth="1.5" fill="none"/>
+          <circle cx="9" cy="11" r="2.5" fill="#000"/>
+          <circle cx="19" cy="11" r="2.5" fill="#000"/>
+          <circle cx="14" cy="20" r="2.5" fill="#000"/>
+          <line x1="9" y1="13.5" x2="14" y2="17.5" stroke="#000" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="19" y1="13.5" x2="14" y2="17.5" stroke="#000" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      </div>
+      GitInsight
+    </a>
+
+    <ul className="nav-links">
+      <li><a href="#product">Product</a></li>
+      <li><a href="#solutions">Solutions</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#security">Security</a></li>
+    </ul>
+
+    <div className="nav-right">
+      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn-signin cursor-target">Sign In</a>
+      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn-cta cursor-target">Get Started</a>
+    </div>
+
+    <button className="nav-mobile-toggle" aria-label="Menu">
+      <span></span>
+    </button>
+  </div>
+</nav>
+
+{/*  ============================================================
+     HERO SECTION
+     ============================================================  */}
+<section className="hero" id="hero">
+  <div className="hero-content">
+    <div className="hero-brand-container reveal" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "48px", marginBottom: "4rem", width: "100%" }}>
+      <svg width="240" height="240" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
+        <circle cx="16" cy="16" r="13" stroke="#000" strokeWidth="2.5" fill="none"/>
+        <circle cx="11" cy="13" r="2.5" fill="#000"/>
+        <circle cx="21" cy="13" r="2.5" fill="#000"/>
+        <circle cx="16" cy="22" r="2.5" fill="#000"/>
+        <line x1="11" y1="15.5" x2="16" y2="19.5" stroke="#000" strokeWidth="2.5" strokeLinecap="round"/>
+        <line x1="21" y1="15.5" x2="16" y2="19.5" stroke="#000" strokeWidth="2.5" strokeLinecap="round"/>
+      </svg>
+      <div style={{ height: "240px", width: "1350px", position: "relative", maxWidth: "100%", flexShrink: 1 }}>
+        <TechText text="GitInsight" fontSize={240} color="#000000" accentColor="#000000" style={{ position: "absolute", inset: 0 }} />
+      </div>
+    </div>
+    <div className="hero-eyebrow reveal" style={{ marginTop: "1rem" }}>
+      <span className="hero-eyebrow-dot"></span>
+      Project Intelligence Platform
+    </div>
+
+    <h1 className="heading-hero reveal reveal-delay-1">
+      Turn GitHub activity<br />into project intelligence.
+    </h1>
+
+    <p className="body-large reveal reveal-delay-2">
+      GitInsight gives project managers a unified view of repositories, teams, development activity and project progress — transforming GitHub data into clear insights, reports and AI-powered answers.
+    </p>
+
+    <div className="btn-group btn-group--center reveal reveal-delay-3">
+      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn btn-github cursor-target">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        Get Started with GitHub
+      </a>
+      <a href="#product" className="btn btn-secondary cursor-target">Explore GitInsight</a>
+    </div>
+  </div>
+
+  {/*  Hero Visual — Scroll-driven animation container  */}
+  <div className="hero-visual reveal-scale reveal-delay-4">
+    <div className="hero-visual-canvas">
+      {/*  This canvas area is designed for scroll-driven JPG frame animation.
+           Replace the mockup below with <canvas> when frames are ready.  */}
+      <div className="hero-dashboard-mockup">
+        <div className="hero-dash-topbar">
+          <div className="hero-dash-topbar-left">
+            <div className="hero-dash-avatar"></div>
+            <div className="hero-dash-text-block">
+              <div className="hero-dash-text-line w-120" style={{"background":"#000","opacity":"0.8"}}></div>
+              <div className="hero-dash-text-line w-80"></div>
+            </div>
+          </div>
+          <div className="hero-dash-topbar-right">
+            <div className="hero-dash-text-line w-60"></div>
+            <div className="hero-dash-btn-mock">
+              <div className="hero-dash-text-line w-60"></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="hero-dash-main">
+          {/*  Stat Card 1  */}
+          <div className="hero-dash-card">
+            <div className="hero-dash-stat">
+              <span className="hero-dash-stat-value">847</span>
+              <span className="hero-dash-stat-label">Total Commits</span>
+            </div>
+            <div className="hero-dash-chart">
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+            </div>
+          </div>
+
+          {/*  Stat Card 2  */}
+          <div className="hero-dash-card">
+            <div className="hero-dash-stat">
+              <span className="hero-dash-stat-value">23</span>
+              <span className="hero-dash-stat-label">Open PRs</span>
+            </div>
+            <div className="hero-dash-chart">
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+            </div>
+          </div>
+
+          {/*  Activity Card  */}
+          <div className="hero-dash-card">
+            <div className="hero-dash-stat">
+              <span className="hero-dash-stat-value">12</span>
+              <span className="hero-dash-stat-label">Active Repos</span>
+            </div>
+            <div className="hero-dash-activity">
+              <div className="hero-dash-activity-item">
+                <span className="hero-dash-activity-dot green"></span>
+                <div className="hero-dash-text-block">
+                  <div className="hero-dash-text-line w-120"></div>
+                </div>
+              </div>
+              <div className="hero-dash-activity-item">
+                <span className="hero-dash-activity-dot blue"></span>
+                <div className="hero-dash-text-block">
+                  <div className="hero-dash-text-line w-80"></div>
+                </div>
+              </div>
+              <div className="hero-dash-activity-item">
+                <span className="hero-dash-activity-dot orange"></span>
+                <div className="hero-dash-text-block">
+                  <div className="hero-dash-text-line w-60"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/*  Large Chart Card  */}
+          <div className="hero-dash-card span-2">
+            <div className="hero-dash-stat">
+              <span className="hero-dash-stat-label">Development Activity — Last 30 Days</span>
+            </div>
+            <div className="hero-dash-chart" style={{"minHeight":"80px"}}>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+              <div className="hero-dash-bar"></div>
+              <div className="hero-dash-bar active"></div>
+            </div>
+          </div>
+
+          {/*  Issue summary card  */}
+          <div className="hero-dash-card">
+            <div className="hero-dash-stat">
+              <span className="hero-dash-stat-value">56</span>
+              <span className="hero-dash-stat-label">Open Issues</span>
+            </div>
+            <div className="hero-dash-activity">
+              <div className="hero-dash-activity-item">
+                <span className="hero-dash-activity-dot orange"></span>
+                <div className="hero-dash-text-block">
+                  <div className="hero-dash-text-line w-80"></div>
+                </div>
+              </div>
+              <div className="hero-dash-activity-item">
+                <span className="hero-dash-activity-dot green"></span>
+                <div className="hero-dash-text-block">
+                  <div className="hero-dash-text-line w-120"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{/*  ============================================================
+     TRUST / CLIENT SECTION
+     ============================================================  */}
+<section className="trust" id="trust">
+  <div className="container">
+    <p className="trust-heading reveal">Built for teams building with GitHub.</p>
+    <div className="trust-logos reveal reveal-delay-1" style={{ width: "100%", overflow: "hidden" }}>
+      <LogoLoop
+        logos={[
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+              </div>
+            )
+          },
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
+                Twitch
+              </div>
+            )
+          },
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z"/></svg>
+                Vercel
+              </div>
+            )
+          },
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm-.31 19.58c-1.03 0-1.75-.7-1.75-1.58 0-.9.73-1.59 1.78-1.59 1.05 0 1.75.69 1.77 1.59 0 .88-.72 1.58-1.8 1.58zm3.01-7.05c-.47.54-.74.86-.74 1.67v.44h-1.97l-.03-.55c-.1-1.2.36-1.96.91-2.59.53-.6.95-1.03.95-1.81 0-.68-.45-1.18-1.38-1.18-.65 0-1.34.28-1.79.67l-.73-1.46c.68-.54 1.72-.91 2.83-.91 2.04 0 3.13 1.12 3.13 2.52 0 1.41-.88 2.09-1.18 2.2z"/></svg>
+                Atlassian
+              </div>
+            )
+          },
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M0 12C0 5.373 5.373 0 12 0s12 5.373 12 12-5.373 12-12 12S0 18.627 0 12zm9.55-4.41l-4.14 7.17h2.39l.68-1.29h2.52l.15 1.29h2.14L11.81 7.59zm.63 4.16l.96-1.82.3 1.82z"/></svg>
+                Linear
+              </div>
+            )
+          },
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>
+                Slack
+              </div>
+            )
+          }
+        ]}
+        speed={30}
+        direction="left"
+        logoHeight={32}
+        gap={40}
+      />
+    </div>
+  </div>
+</section>
+
+{/*  ============================================================
+     PROBLEM SECTION
+     ============================================================  */}
+<section className="problem" id="product">
+  <div className="container">
+    <div className="problem-header">
+      <h2 className="heading-display reveal">Your project's data is everywhere.<br />Your understanding shouldn't be.</h2>
+    </div>
+
+    <div className="problem-description reveal reveal-delay-1">
+      <p className="body-large">
+        GitHub is where your code lives — repositories, commits, pull requests, issues, branches and contributor activity. But for project managers, understanding what's actually happening across multiple repositories and teams means manually navigating GitHub's developer-centric interface, cross-referencing activity, and piecing together progress from scattered signals.
+      </p>
+      <p className="body-regular">
+        Every repository tells part of the story. Commits show what changed. Pull requests show what's being reviewed. Issues show what's outstanding. Contributors show who's active. But none of these signals alone tell you how the project is progressing, where attention is needed, or what happened this week across the entire codebase.
+      </p>
+      <p className="body-regular">
+        Project managers often rely on manual status updates, stand-up meetings, and spreadsheet-based reports to bridge this gap. The information exists inside GitHub — it's just not organized for project-level understanding.
+      </p>
+    </div>
+
+    <div className="problem-visual reveal-scale reveal-delay-2">
+      <div className="fragmented-grid">
+        <div className="fragment-card">
+          <div className="fragment-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+          </div>
+          <h4>Repositories</h4>
+          <p>Multiple repos, multiple contexts</p>
+        </div>
+        <div className="fragment-card">
+          <div className="fragment-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
+          </div>
+          <h4>Commits</h4>
+          <p>Code changes across branches</p>
+        </div>
+        <div className="fragment-card">
+          <div className="fragment-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
+          </div>
+          <h4>Pull Requests</h4>
+          <p>Reviews, merges, discussions</p>
+        </div>
+        <div className="fragment-card">
+          <div className="fragment-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h4>Issues</h4>
+          <p>Bugs, features, tracking</p>
+        </div>
+        <div className="fragment-card">
+          <div className="fragment-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h4>Contributors</h4>
+          <p>Team members across repos</p>
+        </div>
+        <div className="fragment-card">
+          <div className="fragment-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <h4>Manual Reports</h4>
+          <p>Spreadsheets and status updates</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="problem-resolution reveal reveal-delay-2">
+      <p className="body-large">
+        GitInsight brings these fragmented signals together into one project intelligence workspace — giving you a clear, organized view of what's happening across your entire project without manually inspecting every repository.
+      </p>
+    </div>
+  </div>
+</section>
+
+<div className="section-divider"></div>
+
+{/*  ============================================================
+     SOLUTION SECTION
+     ============================================================  */}
+<section className="solution" id="solutions">
+  <div className="container">
+    <div className="solution-header">
+      <h2 className="heading-display reveal">One workspace.<br />A clearer view of your projects.</h2>
+    </div>
+
+    <div className="solution-content reveal reveal-delay-1">
+      <p className="body-large">
+        GitInsight connects to your GitHub organization or repositories through secure OAuth authentication. Once connected, you select the repositories and project scope that matter to you — whether that's a single product, a team's work, or an entire engineering organization.
+      </p>
+      <p className="body-regular">
+        From there, GitInsight organizes development activity across your selected scope into project-level views. Commits become development trends. Pull requests become review activity. Issues become progress indicators. Contributors become team activity. Instead of navigating GitHub repository by repository, you see the project as a whole.
+      </p>
+      <p className="body-regular">
+        GitInsight isn't a replacement for GitHub. It's a layer on top of it — designed specifically for the people who need to understand projects, not write code. Think of it as the difference between reading source code and reading a project summary. Both are valuable, but for different audiences.
+      </p>
+    </div>
+
+    <div className="solution-transform reveal-scale reveal-delay-2">
+      <div className="transform-flow">
+        <div className="transform-node">
+          <div className="transform-node-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          </div>
+          <h4>Raw GitHub Data</h4>
+          <p>Repos, commits, PRs, issues, contributors</p>
+        </div>
+
+        <div className="transform-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+
+        <div className="transform-node highlight">
+          <div className="transform-node-icon" style={{"background":"#000","borderColor":"#000"}}>
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <circle cx="9" cy="11" r="2.5" fill="#fff"/>
+              <circle cx="19" cy="11" r="2.5" fill="#fff"/>
+              <circle cx="14" cy="20" r="2.5" fill="#fff"/>
+              <line x1="9" y1="13.5" x2="14" y2="17.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="19" y1="13.5" x2="14" y2="17.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </div>
+          <h4>GitInsight</h4>
+          <p>Intelligence layer for project managers</p>
+        </div>
+
+        <div className="transform-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+
+        <div className="transform-node">
+          <div className="transform-node-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </div>
+          <h4>Project Intelligence</h4>
+          <p>Dashboards, reports, AI answers</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{/*  ============================================================
+     HOW IT WORKS
+     ============================================================  */}
+<section className="how-it-works" id="how-it-works">
+  <div className="container">
+    <div className="how-it-works-header">
+      <p className="label reveal">How It Works</p>
+      <h2 className="heading-display reveal reveal-delay-1">From connection to clarity.</h2>
+      <p className="body-large reveal reveal-delay-2">Four steps to transform your GitHub data into actionable project intelligence.</p>
+    </div>
+
+    <div className="steps-grid">
+      <div className="step-card reveal reveal-delay-1">
+        <div className="step-number">01</div>
+        <h3>Connect</h3>
+        <p>Connect your GitHub organization or account through secure OAuth authentication. No need to manually copy access tokens — GitInsight handles the authorization flow directly with GitHub.</p>
+        <div className="step-connector"></div>
+      </div>
+
+      <div className="step-card reveal reveal-delay-2">
+        <div className="step-number">02</div>
+        <h3>Select</h3>
+        <p>Choose the repositories and project scope that GitInsight should analyze. Focus on a single product, a team's repositories, or your entire engineering organization. You control the boundaries.</p>
+        <div className="step-connector"></div>
+      </div>
+
+      <div className="step-card reveal reveal-delay-3">
+        <div className="step-number">03</div>
+        <h3>Analyze</h3>
+        <p>GitInsight organizes repository activity, commit history, pull request workflows, issue tracking and contributor patterns into structured project-level and team-level insights automatically.</p>
+        <div className="step-connector"></div>
+      </div>
+
+      <div className="step-card reveal reveal-delay-4">
+        <div className="step-number">04</div>
+        <h3>Understand</h3>
+        <p>Explore interactive dashboards, generate structured reports, or ask the AI assistant questions about your project. Get the understanding you need in the format that works for you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div className="section-divider"></div>
+
+{/*  ============================================================
+     PROJECT INTELLIGENCE SECTION
+     ============================================================  */}
+<section className="intelligence">
+  <div className="container">
+    <div className="intelligence-header">
+      <p className="label reveal">Project Intelligence</p>
+      <h2 className="heading-display reveal reveal-delay-1">See the project,<br />not just the commits.</h2>
+    </div>
+
+    <div className="intelligence-description reveal reveal-delay-2">
+      <p className="body-large">
+        GitInsight converts repository-level development activity into a higher-level project view. Instead of browsing individual commits and pull requests across multiple repositories, you see aggregated project progress, team activity trends, and key indicators — all in one place.
+      </p>
+      <p className="body-regular">
+        The dashboard surfaces what matters most: which areas are active, what's being reviewed, how quickly issues are being addressed, and where your team's attention is focused. It's the project story that GitHub's data already tells — organized for the people who manage projects.
+      </p>
+    </div>
+
+    {/*  Realistic Dashboard Mockup  */}
+    <div className="dashboard-container reveal-scale reveal-delay-3">
+      <div className="dashboard-topbar">
+        <div className="dashboard-topbar-left">
+          <span className="dashboard-project-name">Project Alpha</span>
+          <span className="dashboard-breadcrumb">Overview · Last 30 days</span>
+        </div>
+        <div className="dashboard-topbar-right">
+          <span className="dashboard-tab active">Overview</span>
+          <span className="dashboard-tab">Repos</span>
+          <span className="dashboard-tab">Team</span>
+          <span className="dashboard-tab">Reports</span>
+        </div>
+      </div>
+
+      <div className="dashboard-body">
+        <div className="dashboard-stats-row">
+          <div className="dash-stat-card">
+            <div className="dash-stat-label">Repositories</div>
+            <div className="dash-stat-value">12</div>
+            <div className="dash-stat-change positive">3 active this week</div>
+          </div>
+          <div className="dash-stat-card">
+            <div className="dash-stat-label">Commits</div>
+            <div className="dash-stat-value">847</div>
+            <div className="dash-stat-change positive">+12% from last period</div>
+          </div>
+          <div className="dash-stat-card">
+            <div className="dash-stat-label">Pull Requests</div>
+            <div className="dash-stat-value">23</div>
+            <div className="dash-stat-change">14 merged · 9 open</div>
+          </div>
+          <div className="dash-stat-card">
+            <div className="dash-stat-label">Open Issues</div>
+            <div className="dash-stat-value">56</div>
+            <div className="dash-stat-change positive">8 closed this week</div>
+          </div>
+        </div>
+
+        <div className="dashboard-charts">
+          <div className="dash-chart-card">
+            <div className="dash-chart-title">Development Activity</div>
+            <div className="dash-chart-area">
+              <div className="dash-chart-bar dark" style={{"height":"40%"}}></div>
+              <div className="dash-chart-bar medium" style={{"height":"65%"}}></div>
+              <div className="dash-chart-bar dark" style={{"height":"30%"}}></div>
+              <div className="dash-chart-bar light" style={{"height":"80%"}}></div>
+              <div className="dash-chart-bar dark" style={{"height":"55%"}}></div>
+              <div className="dash-chart-bar medium" style={{"height":"95%"}}></div>
+              <div className="dash-chart-bar dark" style={{"height":"45%"}}></div>
+              <div className="dash-chart-bar light" style={{"height":"70%"}}></div>
+              <div className="dash-chart-bar dark" style={{"height":"35%"}}></div>
+              <div className="dash-chart-bar medium" style={{"height":"85%"}}></div>
+              <div className="dash-chart-bar dark" style={{"height":"60%"}}></div>
+              <div className="dash-chart-bar light" style={{"height":"50%"}}></div>
+              <div className="dash-chart-bar dark" style={{"height":"75%"}}></div>
+              <div className="dash-chart-bar medium" style={{"height":"40%"}}></div>
+              <div className="dash-chart-bar dark" style={{"height":"90%"}}></div>
+              <div className="dash-chart-bar light" style={{"height":"55%"}}></div>
+              <div className="dash-chart-bar dark" style={{"height":"70%"}}></div>
+              <div className="dash-chart-bar medium" style={{"height":"45%"}}></div>
+              <div className="dash-chart-bar dark" style={{"height":"80%"}}></div>
+              <div className="dash-chart-bar light" style={{"height":"35%"}}></div>
+              <div className="dash-chart-bar dark" style={{"height":"65%"}}></div>
+              <div className="dash-chart-bar medium" style={{"height":"50%"}}></div>
+              <div className="dash-chart-bar dark" style={{"height":"85%"}}></div>
+              <div className="dash-chart-bar medium" style={{"height":"60%"}}></div>
+            </div>
+          </div>
+
+          <div className="dash-chart-card">
+            <div className="dash-chart-title">Recent Activity</div>
+            <div className="dash-activity-list">
+              <div className="dash-activity-item">
+                <div className="dash-activity-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
+                </div>
+                <div className="dash-activity-text">
+                  <strong>PR #142 merged</strong>
+                  <p>Auth module refactor — frontend</p>
+                </div>
+                <span className="dash-activity-time">2h ago</span>
+              </div>
+              <div className="dash-activity-item">
+                <div className="dash-activity-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
+                </div>
+                <div className="dash-activity-text">
+                  <strong>14 commits pushed</strong>
+                  <p>api-service · main branch</p>
+                </div>
+                <span className="dash-activity-time">4h ago</span>
+              </div>
+              <div className="dash-activity-item">
+                <div className="dash-activity-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div className="dash-activity-text">
+                  <strong>Issue #89 opened</strong>
+                  <p>Performance regression in search</p>
+                </div>
+                <span className="dash-activity-time">6h ago</span>
+              </div>
+              <div className="dash-activity-item">
+                <div className="dash-activity-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                </div>
+                <div className="dash-activity-text">
+                  <strong>New contributor</strong>
+                  <p>Sarah joined infra-tools repo</p>
+                </div>
+                <span className="dash-activity-time">1d ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{/*  ============================================================
+     TEAM ANALYTICS SECTION
+     ============================================================  */}
+<section className="team-analytics">
+  <div className="container">
+    <div className="team-analytics-header">
+      <p className="label reveal">Team Activity</p>
+      <h2 className="heading-display reveal reveal-delay-1">Understand how<br />your team is moving.</h2>
+    </div>
+
+    <div className="team-analytics-description reveal reveal-delay-2">
+      <p className="body-large">
+        Software projects are team efforts. GitInsight helps project managers understand development activity patterns across repositories and contributors — not to rank individuals, but to see where work is happening, how the team is progressing, and where the project needs attention.
+      </p>
+      <p className="body-regular">
+        Track repository activity, contribution trends, pull request workflows, issue resolution patterns and commit frequency across your entire project scope. Understand the rhythm of your team's development process without asking for manual updates.
+      </p>
+    </div>
+
+    <div className="team-dashboard reveal-scale reveal-delay-3">
+      <div className="team-grid">
+        <div className="team-card">
+          <div className="team-card-title">Repository Activity</div>
+          <div className="team-mini-chart">
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar"></div>
+          </div>
+        </div>
+
+        <div className="team-card">
+          <div className="team-card-title">Contribution Activity (52 weeks)</div>
+          <div className="team-heatmap">
+            {/*  Generate a realistic heatmap grid  */}
+            <div className="heatmap-cell"></div><div className="heatmap-cell l1"></div><div className="heatmap-cell l2"></div><div className="heatmap-cell"></div><div className="heatmap-cell l1"></div><div className="heatmap-cell l3"></div><div className="heatmap-cell"></div>
+            <div className="heatmap-cell l2"></div><div className="heatmap-cell"></div><div className="heatmap-cell l1"></div><div className="heatmap-cell l4"></div><div className="heatmap-cell"></div><div className="heatmap-cell l2"></div><div className="heatmap-cell l1"></div>
+            <div className="heatmap-cell"></div><div className="heatmap-cell l3"></div><div className="heatmap-cell"></div><div className="heatmap-cell l1"></div><div className="heatmap-cell l2"></div><div className="heatmap-cell"></div><div className="heatmap-cell l4"></div>
+            <div className="heatmap-cell l1"></div><div className="heatmap-cell"></div><div className="heatmap-cell l4"></div><div className="heatmap-cell l2"></div><div className="heatmap-cell"></div><div className="heatmap-cell l1"></div><div className="heatmap-cell"></div>
+            <div className="heatmap-cell l3"></div><div className="heatmap-cell l1"></div><div className="heatmap-cell"></div><div className="heatmap-cell l1"></div><div className="heatmap-cell l3"></div><div className="heatmap-cell"></div><div className="heatmap-cell l2"></div>
+            <div className="heatmap-cell"></div><div className="heatmap-cell l2"></div><div className="heatmap-cell l1"></div><div className="heatmap-cell"></div><div className="heatmap-cell l4"></div><div className="heatmap-cell l1"></div><div className="heatmap-cell"></div>
+            <div className="heatmap-cell l1"></div><div className="heatmap-cell"></div><div className="heatmap-cell l3"></div><div className="heatmap-cell l2"></div><div className="heatmap-cell"></div><div className="heatmap-cell l2"></div><div className="heatmap-cell l3"></div>
+          </div>
+        </div>
+
+        <div className="team-card">
+          <div className="team-card-title">Team Members</div>
+          <div className="team-contributors">
+            <div className="team-contributor">
+              <div className="team-contributor-avatar">AK</div>
+              <div className="team-contributor-info">
+                <div className="team-contributor-name">Alex Kim</div>
+                <div className="team-contributor-stat">142 commits · 18 PRs</div>
+              </div>
+              <div className="team-contributor-bar-container">
+                <div className="team-contributor-bar" style={{"width":"85%"}}></div>
+              </div>
+            </div>
+            <div className="team-contributor">
+              <div className="team-contributor-avatar">MR</div>
+              <div className="team-contributor-info">
+                <div className="team-contributor-name">Maya Ross</div>
+                <div className="team-contributor-stat">98 commits · 12 PRs</div>
+              </div>
+              <div className="team-contributor-bar-container">
+                <div className="team-contributor-bar" style={{"width":"65%"}}></div>
+              </div>
+            </div>
+            <div className="team-contributor">
+              <div className="team-contributor-avatar">JL</div>
+              <div className="team-contributor-info">
+                <div className="team-contributor-name">Jordan Lee</div>
+                <div className="team-contributor-stat">76 commits · 9 PRs</div>
+              </div>
+              <div className="team-contributor-bar-container">
+                <div className="team-contributor-bar" style={{"width":"48%"}}></div>
+              </div>
+            </div>
+            <div className="team-contributor">
+              <div className="team-contributor-avatar">SP</div>
+              <div className="team-contributor-info">
+                <div className="team-contributor-name">Sam Patel</div>
+                <div className="team-contributor-stat">61 commits · 7 PRs</div>
+              </div>
+              <div className="team-contributor-bar-container">
+                <div className="team-contributor-bar" style={{"width":"38%"}}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="team-card">
+          <div className="team-card-title">Pull Request Activity</div>
+          <div className="team-mini-chart">
+            <div className="team-mini-bar"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar active"></div>
+            <div className="team-mini-bar active"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div className="section-divider"></div>
+
+{/*  ============================================================
+     AI ASSISTANT SECTION
+     ============================================================  */}
+<section className="ai-assistant">
+  <div className="container">
+    <div className="ai-assistant-header">
+      <p className="label reveal">AI Assistant</p>
+      <h2 className="heading-display reveal reveal-delay-1">Ask your project<br />anything.</h2>
+    </div>
+
+    <div className="ai-assistant-description reveal reveal-delay-2">
+      <p className="body-large">
+        Sometimes you don't want a dashboard — you want an answer. GitInsight's AI assistant lets you ask natural-language questions about your project and receive structured, contextual responses based on actual development activity.
+      </p>
+      <p className="body-regular">
+        Whether you need a quick summary of what happened this week, want to understand which repositories are most active, or need to identify unresolved issues that require attention — just ask. The AI assistant provides a conversational interface to your project intelligence.
+      </p>
+    </div>
+
+    <div className="ai-interface reveal-scale reveal-delay-3">
+      <div className="ai-interface-header">
+        <div className="ai-interface-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div>
+          <div className="ai-interface-title">GitInsight AI</div>
+          <div className="ai-interface-subtitle">Project Alpha · Ask anything about your project</div>
+        </div>
+      </div>
+
+      <div className="ai-chat">
+        <div className="ai-message user">
+          <div className="ai-message-avatar">PM</div>
+          <div className="ai-message-bubble">
+            What changed in Project Alpha this week?
+          </div>
+        </div>
+
+        <div className="ai-message assistant">
+          <div className="ai-message-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div className="ai-message-bubble">
+            <strong>Project Alpha — Week of Sept 29</strong>
+            <br /><br />
+            Here's a summary of this week's development activity across your 12 repositories:
+            <ul>
+              <li><strong>127 commits</strong> pushed across 5 active repositories</li>
+              <li><strong>8 pull requests merged</strong>, 3 currently in review</li>
+              <li><strong>12 issues closed</strong>, 4 new issues opened</li>
+              <li>Most active repos: <strong>frontend</strong> (52 commits), <strong>api-service</strong> (38 commits)</li>
+              <li>The <strong>auth module refactor</strong> PR (#142) was merged after 3 review cycles</li>
+              <li>A <strong>performance regression</strong> in search was flagged (Issue #89) — currently unassigned</li>
+            </ul>
+            Overall, the project saw steady development activity this week with a focus on the frontend and API layers. The unresolved performance issue may need attention.
+          </div>
+        </div>
+      </div>
+
+      <div className="ai-suggestions">
+        <button className="ai-suggestion">Which repositories are currently active?</button>
+        <button className="ai-suggestion">What are the major unresolved issues?</button>
+        <button className="ai-suggestion">Summarize this week's development activity.</button>
+        <button className="ai-suggestion">Which areas need attention?</button>
+      </div>
+
+      <div className="ai-input-area">
+        <div className="ai-input-container">
+          <input type="text" className="ai-input" placeholder="Ask about your project..." />
+          <button className="ai-send-btn" aria-label="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{/*  ============================================================
+     REPORTS SECTION
+     ============================================================  */}
+<section className="reports">
+  <div className="container">
+    <div className="reports-header">
+      <p className="label reveal">Reports</p>
+      <h2 className="heading-display reveal reveal-delay-1">Turn project activity<br />into reports.</h2>
+    </div>
+
+    <div className="reports-description reveal reveal-delay-2">
+      <p className="body-large">
+        Project managers need structured reports — not raw data. GitInsight organizes development activity into clean, shareable project reports that communicate progress, highlight key updates, and provide the kind of structured summary that stakeholders and leadership expect.
+      </p>
+      <p className="body-regular">
+        Define reporting periods, select which repositories and teams to include, and GitInsight generates a comprehensive project report covering development activity, pull request workflows, issue resolution and key updates. Export, share, or use as the foundation for your project status meetings.
+      </p>
+    </div>
+
+    <div className="report-preview reveal-scale reveal-delay-3">
+      <div className="report-preview-header">
+        <div className="report-preview-header-left">
+          <h3>Project Alpha — Weekly Report</h3>
+          <p>September 29 – October 3, 2026</p>
+        </div>
+        <div className="report-preview-actions">
+          <button className="report-action-btn secondary">Export PDF</button>
+          <button className="report-action-btn primary">Share</button>
+        </div>
+      </div>
+
+      <div className="report-body">
+        <div className="report-section">
+          <div className="report-section-title">Project Details</div>
+          <div className="report-meta-grid">
+            <div className="report-meta-item">
+              <span className="report-meta-label">Project</span>
+              <span className="report-meta-value">Project Alpha</span>
+            </div>
+            <div className="report-meta-item">
+              <span className="report-meta-label">Reporting Period</span>
+              <span className="report-meta-value">Sept 29 – Oct 3, 2026</span>
+            </div>
+            <div className="report-meta-item">
+              <span className="report-meta-label">Repositories</span>
+              <span className="report-meta-value">12 repositories · 5 active</span>
+            </div>
+            <div className="report-meta-item">
+              <span className="report-meta-label">Team Size</span>
+              <span className="report-meta-value">8 contributors</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="report-section">
+          <div className="report-section-title">Development Activity</div>
+          <div className="report-stats-grid">
+            <div className="report-stat">
+              <div className="report-stat-value">127</div>
+              <div className="report-stat-label">Commits</div>
+            </div>
+            <div className="report-stat">
+              <div className="report-stat-value">11</div>
+              <div className="report-stat-label">Pull Requests</div>
+            </div>
+            <div className="report-stat">
+              <div className="report-stat-value">12</div>
+              <div className="report-stat-label">Issues Closed</div>
+            </div>
+            <div className="report-stat">
+              <div className="report-stat-value">5</div>
+              <div className="report-stat-label">Active Repos</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="report-section">
+          <div className="report-section-title">Key Updates</div>
+          <div className="report-updates">
+            <div className="report-update">
+              <div className="report-update-dot"></div>
+              <p>Auth module refactoring completed and merged after three review cycles. Frontend authentication now uses the updated token refresh flow.</p>
+            </div>
+            <div className="report-update">
+              <div className="report-update-dot"></div>
+              <p>Performance regression identified in the search service (Issue #89). Response times increased by approximately 40% after last week's indexing change. Currently unassigned.</p>
+            </div>
+            <div className="report-update">
+              <div className="report-update-dot"></div>
+              <p>API service saw significant activity with 38 commits focused on the new GraphQL endpoint migration. Expected completion next week.</p>
+            </div>
+            <div className="report-update">
+              <div className="report-update-dot"></div>
+              <p>New team member (Sarah) onboarded and began contributing to the infrastructure tooling repository.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="report-section">
+          <div className="report-section-title">Project Summary</div>
+          <div className="report-summary">
+            <p>Project Alpha showed steady development activity during the reporting period, with primary focus on the frontend auth refactor and the API GraphQL migration. The team closed more issues than were opened, indicating positive progress on the backlog. One area requiring attention is the search performance regression (Issue #89), which should be prioritized and assigned in the upcoming sprint. Overall project velocity remains consistent with the previous reporting period.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div className="section-divider"></div>
+
+{/*  ============================================================
+     GITHUB INTEGRATION SECTION
+     ============================================================  */}
+<section className="github-integration">
+  <div className="container">
+    <div className="github-integration-header">
+      <p className="label reveal">Integration</p>
+      <h2 className="heading-display reveal reveal-delay-1">Your GitHub projects,<br />connected.</h2>
+    </div>
+
+    <div className="github-integration-description reveal reveal-delay-2">
+      <p className="body-large">
+        GitInsight connects to GitHub through OAuth — the same secure authorization flow you use when signing into any application with your GitHub account. No manual token copying. No complex configuration. Just authorize and choose your project scope.
+      </p>
+      <p className="body-regular">
+        Once connected, GitInsight accesses only the repositories and data within the permissions you grant. You remain in control of what GitInsight can see and analyze. The connection can be revoked at any time through your GitHub settings.
+      </p>
+    </div>
+
+    <div className="integration-flow reveal reveal-delay-3">
+      <div className="integration-step">
+        <div className="integration-step-number">1</div>
+        <div className="integration-step-content">
+          <h4>Continue with GitHub</h4>
+          <p>Click to begin the secure OAuth authorization flow with GitHub.</p>
+        </div>
+      </div>
+      <div className="integration-connector"></div>
+      <div className="integration-step">
+        <div className="integration-step-number">2</div>
+        <div className="integration-step-content">
+          <h4>Authorize on GitHub</h4>
+          <p>Review and approve the permissions GitInsight is requesting on GitHub's authorization page.</p>
+        </div>
+      </div>
+      <div className="integration-connector"></div>
+      <div className="integration-step">
+        <div className="integration-step-number">3</div>
+        <div className="integration-step-content">
+          <h4>Return to GitInsight</h4>
+          <p>You're securely connected. GitInsight can now access your authorized repositories.</p>
+        </div>
+      </div>
+      <div className="integration-connector"></div>
+      <div className="integration-step">
+        <div className="integration-step-number">4</div>
+        <div className="integration-step-content">
+          <h4>Choose Your Project Scope</h4>
+          <p>Select the repositories and teams you want GitInsight to organize into your project workspace.</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="github-outputs reveal reveal-delay-4">
+      <div className="github-output">
+        <div className="github-output-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <h5>Projects</h5>
+      </div>
+      <div className="github-output">
+        <div className="github-output-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h5>Teams</h5>
+      </div>
+      <div className="github-output">
+        <div className="github-output-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <h5>Analytics</h5>
+      </div>
+      <div className="github-output">
+        <div className="github-output-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h5>Reports</h5>
+      </div>
+      <div className="github-output">
+        <div className="github-output-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h5>AI</h5>
+      </div>
+    </div>
+  </div>
+</section>
+
+{/*  ============================================================
+     SECURITY SECTION
+     ============================================================  */}
+<section className="security" id="security">
+  <div className="container">
+    <div className="security-header">
+      <p className="label reveal">Security</p>
+      <h2 className="heading-display reveal reveal-delay-1">Your project data deserves<br />careful handling.</h2>
+    </div>
+
+    <div className="security-description reveal reveal-delay-2">
+      <p className="body-large">
+        GitInsight is designed with a security-conscious approach to handling your GitHub data. We believe that access to project intelligence should not require compromising on how your data is treated.
+      </p>
+    </div>
+
+    <div className="security-grid">
+      <div className="security-card reveal reveal-delay-1">
+        <div className="security-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h4>Authenticated Access</h4>
+        <p>All connections use GitHub's OAuth 2.0 flow. Credentials are handled through GitHub's authorization infrastructure — not stored as plain text tokens in GitInsight.</p>
+      </div>
+
+      <div className="security-card reveal reveal-delay-2">
+        <div className="security-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h4>Repository Permissions</h4>
+        <p>GitInsight only accesses repositories within the scope you authorize. You can limit access to specific repositories and revoke permissions at any time through GitHub.</p>
+      </div>
+
+      <div className="security-card reveal reveal-delay-3">
+        <div className="security-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h4>Project Scope Control</h4>
+        <p>You define which repositories and teams form your project. GitInsight works within the boundaries you set, not beyond them.</p>
+      </div>
+
+      <div className="security-card reveal reveal-delay-4">
+        <div className="security-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        </div>
+        <h4>Secure Credentials</h4>
+        <p>OAuth tokens and credentials are handled with care — encrypted at rest and transmitted only over secure connections. No credentials are exposed in the GitInsight interface.</p>
+      </div>
+
+      <div className="security-card reveal reveal-delay-5">
+        <div className="security-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h4>Controlled Data Access</h4>
+        <p>GitInsight reads development activity metadata — not your source code contents. The platform is designed to understand project activity patterns, not to access proprietary code.</p>
+      </div>
+
+      <div className="security-card reveal reveal-delay-5">
+        <div className="security-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h4>Responsible AI Access</h4>
+        <p>The AI assistant uses project activity data to generate insights and summaries. It operates within the same permission boundaries as your GitInsight project scope.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div className="section-divider"></div>
+
+{/*  ============================================================
+     WHO IS IT FOR
+     ============================================================  */}
+<section className="audience">
+  <div className="container">
+    <div className="audience-header">
+      <p className="label reveal">Who Is It For</p>
+      <h2 className="heading-display reveal reveal-delay-1">Built for the people<br />who manage the work.</h2>
+    </div>
+
+    <div className="audience-grid">
+      <div className="audience-card reveal reveal-delay-1">
+        <div className="audience-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h3>Project Managers</h3>
+        <p>You're responsible for project outcomes but don't live inside GitHub. GitInsight gives you a clear, organized view of development activity, progress and team output without requiring you to navigate repositories, read code, or parse commit histories. Understand your projects at the level you need — not the level developers operate at.</p>
+      </div>
+
+      <div className="audience-card reveal reveal-delay-2">
+        <div className="audience-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        </div>
+        <h3>Engineering Managers</h3>
+        <p>You understand the code but need project-level visibility across multiple teams and repositories. GitInsight aggregates development activity so you can see patterns, identify bottlenecks, and understand where engineering effort is concentrated — without manually reviewing every pull request and issue across your organization.</p>
+      </div>
+
+      <div className="audience-card reveal reveal-delay-3">
+        <div className="audience-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Team Leads</h3>
+        <p>You're close to the development process but still need a higher-level view of how your team is performing. GitInsight helps you track contribution patterns, pull request workflows, and issue resolution across the repositories your team owns — providing the context you need for sprint planning, retrospectives, and progress updates.</p>
+      </div>
+
+      <div className="audience-card reveal reveal-delay-4">
+        <div className="audience-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <h3>Organizations</h3>
+        <p>For organizations with multiple teams and many repositories, GitInsight provides a centralized view of development activity across the entire engineering organization. Understand how different projects are progressing, where resources are allocated, and how to communicate engineering output to stakeholders and leadership.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{/*  ============================================================
+     PRODUCT WORKFLOW
+     ============================================================  */}
+<section className="workflow">
+  <div className="container">
+    <div className="workflow-header">
+      <p className="label reveal">Workflow</p>
+      <h2 className="heading-display reveal reveal-delay-1">The complete journey.</h2>
+      <p className="body-large reveal reveal-delay-2">From connecting your GitHub to taking action on project intelligence.</p>
+    </div>
+  </div>
+
+  <div className="workflow-track-container reveal reveal-delay-3">
+    <div className="workflow-track">
+      <div className="workflow-stage">
+        <span className="workflow-stage-number">01</span>
+        <div className="workflow-stage-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </div>
+        <h4>Connect</h4>
+        <p>Authenticate with GitHub securely</p>
+      </div>
+
+      <div className="workflow-stage">
+        <span className="workflow-stage-number">02</span>
+        <div className="workflow-stage-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h4>Understand</h4>
+        <p>View project dashboards and insights</p>
+      </div>
+
+      <div className="workflow-stage">
+        <span className="workflow-stage-number">03</span>
+        <div className="workflow-stage-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <h4>Analyze</h4>
+        <p>Explore team and development patterns</p>
+      </div>
+
+      <div className="workflow-stage">
+        <span className="workflow-stage-number">04</span>
+        <div className="workflow-stage-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h4>Ask</h4>
+        <p>Question the AI about your project</p>
+      </div>
+
+      <div className="workflow-stage">
+        <span className="workflow-stage-number">05</span>
+        <div className="workflow-stage-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h4>Report</h4>
+        <p>Generate structured project reports</p>
+      </div>
+
+      <div className="workflow-stage">
+        <span className="workflow-stage-number">06</span>
+        <div className="workflow-stage-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <h4>Act</h4>
+        <p>Make informed decisions with clarity</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div className="section-divider"></div>
+
+{/*  ============================================================
+     FINAL CTA
+     ============================================================  */}
+<section className="final-cta">
+  <div className="container">
+    <h2 className="heading-display reveal">Your GitHub already<br />contains the story.</h2>
+    <p className="body-large reveal reveal-delay-1">
+      GitInsight helps turn development activity into a clearer understanding of your projects, teams and progress.
+    </p>
+    <div className="btn-group btn-group--center reveal reveal-delay-2">
+      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn btn-github cursor-target">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        Get Started with GitHub
+      </a>
+      <a href="#product" className="btn btn-secondary cursor-target">Explore the Platform</a>
+    </div>
+  </div>
+</section>
+
+{/*  ============================================================
+     FOOTER
+     ============================================================  */}
+<footer className="footer">
+  <div className="container">
+    <div className="footer-grid">
+      <div className="footer-brand">
+        <div className="footer-logo">
+          <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="13" stroke="#000" strokeWidth="1.5" fill="none"/>
+            <circle cx="9" cy="11" r="2.5" fill="#000"/>
+            <circle cx="19" cy="11" r="2.5" fill="#000"/>
+            <circle cx="14" cy="20" r="2.5" fill="#000"/>
+            <line x1="9" y1="13.5" x2="14" y2="17.5" stroke="#000" strokeWidth="1.5" strokeLinecap="round"/>
+            <line x1="19" y1="13.5" x2="14" y2="17.5" stroke="#000" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+          GitInsight
+        </div>
+        <p>Project intelligence for teams building with GitHub. Understand your projects, teams and progress — without inspecting every repository.</p>
+      </div>
+
+      <div className="footer-column">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#product">Features</a></li>
+          <li><a href="#">Analytics</a></li>
+          <li><a href="#">AI Assistant</a></li>
+          <li><a href="#">Reports</a></li>
+        </ul>
+      </div>
+
+      <div className="footer-column">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#security">Security</a></li>
+          <li><a href="#">Privacy</a></li>
+        </ul>
+      </div>
+
+      <div className="footer-column">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div className="footer-bottom">
+      <p>&copy; 2026 GitInsight. All rights reserved.</p>
+      <div className="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    </div>
+  );
+}

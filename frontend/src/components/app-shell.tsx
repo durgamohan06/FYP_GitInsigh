@@ -16,7 +16,7 @@ import {
   X,
   ChevronDown,
 } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import type { GitHubUserProfile } from "@/lib/github-oauth";
 import { applyTheme, loadSettings, saveTheme, type AppSettings } from "@/lib/settings-service";
 
@@ -38,33 +38,44 @@ function SearchGroup({ label, results }: { label: string; results: SearchResult[
 }
 
 function useTheme() {
-  const [theme, setTheme] = useState<AppSettings["theme"]>("system");
-  const [dark, setDark] = useState(false);
-  useEffect(() => {
+  const [theme, setTheme] = useState<AppSettings["theme"]>(() => loadSettings().theme);
+  const [dark, setDark] = useState(() => {
+    const currentTheme = loadSettings().theme;
+    return currentTheme === "dark" || (currentTheme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  });
+
+  useLayoutEffect(() => {
     const currentTheme = loadSettings().theme;
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const sync = (nextTheme: AppSettings["theme"]) => {
       setTheme(nextTheme);
-      setDark(nextTheme === "dark" || (nextTheme === "system" && media.matches));
+      const nextDark = nextTheme === "dark" || (nextTheme === "system" && media.matches);
+      setDark(nextDark);
       applyTheme(nextTheme);
     };
-    const handleThemeChange = (event: Event) => sync((event as CustomEvent<AppSettings["theme"]>).detail);
-    const handleSystemChange = () => { if (theme === "system") sync("system"); };
-    sync(currentTheme);
-    window.addEventListener("gitinsight-theme-change", handleThemeChange);
-    media.addEventListener("change", handleSystemChange);
-    return () => {
-      window.removeEventListener("gitinsight-theme-change", handleThemeChange);
-      media.removeEventListener("change", handleSystemChange);
+
+    const handleSystemChange = () => {
+      if (theme === "system") sync("system");
     };
+
+    sync(currentTheme);
+    media.addEventListener("change", handleSystemChange);
+
+    return () => media.removeEventListener("change", handleSystemChange);
   }, [theme]);
+
   const toggle = () => {
-    saveTheme(dark ? "light" : "dark");
+    const nextTheme = dark ? "light" : "dark";
+    saveTheme(nextTheme);
+    setTheme(nextTheme);
+    setDark(nextTheme === "dark");
+    applyTheme(nextTheme);
   };
+
   return { dark, toggle };
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, dashboard = false }: { children: ReactNode; dashboard?: boolean }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const { dark, toggle } = useTheme();
@@ -77,6 +88,25 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [platformRepositories, setPlatformRepositories] = useState<SearchResult[]>([]);
   const [notifications, setNotifications] = useState(0);
   const [refreshSettingsVersion, setRefreshSettingsVersion] = useState(0);
+
+  useEffect(() => {
+    if (!dashboard) return;
+
+    const landingStylesheet = Array.from(document.querySelectorAll("style")).find((style) =>
+      style.textContent?.includes("SF Pro Display"),
+    );
+    if (!landingStylesheet?.parentNode) return;
+
+    const parent = landingStylesheet.parentNode;
+    const nextSibling = landingStylesheet.nextSibling;
+    parent.removeChild(landingStylesheet);
+
+    return () => {
+      if (!landingStylesheet.isConnected) {
+        parent.insertBefore(landingStylesheet, nextSibling);
+      }
+    };
+  }, [dashboard]);
 
   useEffect(() => {
     const settings = loadSettings();
