@@ -106,7 +106,7 @@ function Dashboard() {
   ];
 
   return (
-    <AppShell>
+    <AppShell dashboard>
       <PageHeader
         title={`Good Morning, ${userName} 👋`}
         subtitle="Here's what's happening across your GitHub projects today."

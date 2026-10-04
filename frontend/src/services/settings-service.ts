@@ -13,7 +13,7 @@ export interface AppSettings {
 export const defaultSettings: AppSettings = {
   github: { connected: true, username: "durgamohan06", repositories: [{ name: "auth-module", connected: true }, { name: "dashboard-ui", connected: true }, { name: "ai-engine", connected: false }] },
   ai: { provider: "OpenAI", model: "GPT-5.6 Luna", responseStyle: "Balanced" },
-  theme: "system",
+  theme: "dark",
   autoRefresh: { enabled: false, intervalMinutes: 60 },
   voice: { enabled: true, wakeWord: "GitInsight", voice: "Samantha", speed: 1, autoplay: false },
   notifications: { email: true, push: true, slack: true, events: { repository: true, issues: true, reviews: true, reports: true, summary: false }, quietFrom: "22:00", quietTo: "08:00" },
@@ -23,14 +23,26 @@ export const defaultSettings: AppSettings = {
 };
 
 const key = "gitinsight-settings";
-export function loadSettings(): AppSettings { if (typeof window === "undefined") return defaultSettings; try { const stored = JSON.parse(localStorage.getItem(key) || "{}"); return { ...defaultSettings, ...stored, autoRefresh: { ...defaultSettings.autoRefresh, ...(stored.autoRefresh || {}) } }; } catch { return defaultSettings; } }
+export function loadSettings(): AppSettings {
+  if (typeof window === "undefined") return defaultSettings;
+  try {
+    const stored = JSON.parse(localStorage.getItem(key) || "{}");
+    return {
+      ...defaultSettings,
+      ...stored,
+      theme: stored.theme ?? defaultSettings.theme,
+      autoRefresh: { ...defaultSettings.autoRefresh, ...(stored.autoRefresh || {}) },
+    };
+  } catch {
+    return defaultSettings;
+  }
+}
 export function saveSettings(settings: AppSettings) { if (typeof window !== "undefined") localStorage.setItem(key, JSON.stringify(settings)); }
 export function applyTheme(theme: AppSettings["theme"]) {
   if (typeof document === "undefined") return;
   const dark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.classList.toggle("dark", dark);
   document.documentElement.dataset.theme = theme;
-  window.dispatchEvent(new CustomEvent("gitinsight-theme-change", { detail: theme }));
 }
 export function saveTheme(theme: AppSettings["theme"]) {
   const settings = loadSettings();
