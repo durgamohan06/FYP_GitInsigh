@@ -2,6 +2,9 @@
 import { useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
+import TargetCursor from "./TargetCursor";
+import TechText from "./TechText";
+import LogoLoop from "./LogoLoop";
 
 export function LandingPageComponent({ loggingIn, handleGitHubLogin }) {
   useEffect(() => {
@@ -66,7 +69,7 @@ export function LandingPageComponent({ loggingIn, handleGitHubLogin }) {
 
   return (
     <div className="landing-page-wrapper">
-      
+      <TargetCursor targetSelector=".cursor-target" cursorColor="#fff" cursorColorOnTarget="#fff" />
 
 {/*  ============================================================
      NAVIGATION
@@ -96,8 +99,8 @@ export function LandingPageComponent({ loggingIn, handleGitHubLogin }) {
     </ul>
 
     <div className="nav-right">
-      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn-signin">Sign In</a>
-      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn-cta">Get Started</a>
+      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn-signin cursor-target">Sign In</a>
+      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn-cta cursor-target">Get Started</a>
     </div>
 
     <button className="nav-mobile-toggle" aria-label="Menu">
@@ -111,7 +114,20 @@ export function LandingPageComponent({ loggingIn, handleGitHubLogin }) {
      ============================================================  */}
 <section className="hero" id="hero">
   <div className="hero-content">
-    <div className="hero-eyebrow reveal">
+    <div className="hero-brand-container reveal" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "48px", marginBottom: "4rem", width: "100%" }}>
+      <svg width="240" height="240" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
+        <circle cx="16" cy="16" r="13" stroke="#000" strokeWidth="2.5" fill="none"/>
+        <circle cx="11" cy="13" r="2.5" fill="#000"/>
+        <circle cx="21" cy="13" r="2.5" fill="#000"/>
+        <circle cx="16" cy="22" r="2.5" fill="#000"/>
+        <line x1="11" y1="15.5" x2="16" y2="19.5" stroke="#000" strokeWidth="2.5" strokeLinecap="round"/>
+        <line x1="21" y1="15.5" x2="16" y2="19.5" stroke="#000" strokeWidth="2.5" strokeLinecap="round"/>
+      </svg>
+      <div style={{ height: "240px", width: "1350px", position: "relative", maxWidth: "100%", flexShrink: 1 }}>
+        <TechText text="GitInsight" fontSize={240} color="#000000" accentColor="#000000" style={{ position: "absolute", inset: 0 }} />
+      </div>
+    </div>
+    <div className="hero-eyebrow reveal" style={{ marginTop: "1rem" }}>
       <span className="hero-eyebrow-dot"></span>
       Project Intelligence Platform
     </div>
@@ -125,11 +141,11 @@ export function LandingPageComponent({ loggingIn, handleGitHubLogin }) {
     </p>
 
     <div className="btn-group btn-group--center reveal reveal-delay-3">
-      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn btn-github">
+      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn btn-github cursor-target">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
         Get Started with GitHub
       </a>
-      <a href="#product" className="btn btn-secondary">Explore GitInsight</a>
+      <a href="#product" className="btn btn-secondary cursor-target">Explore GitInsight</a>
     </div>
   </div>
 
@@ -286,32 +302,63 @@ export function LandingPageComponent({ loggingIn, handleGitHubLogin }) {
 <section className="trust" id="trust">
   <div className="container">
     <p className="trust-heading reveal">Built for teams building with GitHub.</p>
-    <div className="trust-logos reveal reveal-delay-1">
-      {/*  Ecosystem & integration logos (monochrome)  */}
-      <div className="trust-logo">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
-        GitHub
-      </div>
-      <div className="trust-logo">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
-        Twitch
-      </div>
-      <div className="trust-logo">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z"/></svg>
-        Vercel
-      </div>
-      <div className="trust-logo">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm-.31 19.58c-1.03 0-1.75-.7-1.75-1.58 0-.9.73-1.59 1.78-1.59 1.05 0 1.75.69 1.77 1.59 0 .88-.72 1.58-1.8 1.58zm3.01-7.05c-.47.54-.74.86-.74 1.67v.44h-1.97l-.03-.55c-.1-1.2.36-1.96.91-2.59.53-.6.95-1.03.95-1.81 0-.68-.45-1.18-1.38-1.18-.65 0-1.34.28-1.79.67l-.73-1.46c.68-.54 1.72-.91 2.83-.91 2.04 0 3.13 1.12 3.13 2.52 0 1.41-.88 2.09-1.18 2.2z"/></svg>
-        Atlassian
-      </div>
-      <div className="trust-logo">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M0 12C0 5.373 5.373 0 12 0s12 5.373 12 12-5.373 12-12 12S0 18.627 0 12zm9.55-4.41l-4.14 7.17h2.39l.68-1.29h2.52l.15 1.29h2.14L11.81 7.59zm.63 4.16l.96-1.82.3 1.82z"/></svg>
-        Linear
-      </div>
-      <div className="trust-logo">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>
-        Slack
-      </div>
+    <div className="trust-logos reveal reveal-delay-1" style={{ width: "100%", overflow: "hidden" }}>
+      <LogoLoop
+        logos={[
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+              </div>
+            )
+          },
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
+                Twitch
+              </div>
+            )
+          },
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z"/></svg>
+                Vercel
+              </div>
+            )
+          },
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm-.31 19.58c-1.03 0-1.75-.7-1.75-1.58 0-.9.73-1.59 1.78-1.59 1.05 0 1.75.69 1.77 1.59 0 .88-.72 1.58-1.8 1.58zm3.01-7.05c-.47.54-.74.86-.74 1.67v.44h-1.97l-.03-.55c-.1-1.2.36-1.96.91-2.59.53-.6.95-1.03.95-1.81 0-.68-.45-1.18-1.38-1.18-.65 0-1.34.28-1.79.67l-.73-1.46c.68-.54 1.72-.91 2.83-.91 2.04 0 3.13 1.12 3.13 2.52 0 1.41-.88 2.09-1.18 2.2z"/></svg>
+                Atlassian
+              </div>
+            )
+          },
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M0 12C0 5.373 5.373 0 12 0s12 5.373 12 12-5.373 12-12 12S0 18.627 0 12zm9.55-4.41l-4.14 7.17h2.39l.68-1.29h2.52l.15 1.29h2.14L11.81 7.59zm.63 4.16l.96-1.82.3 1.82z"/></svg>
+                Linear
+              </div>
+            )
+          },
+          {
+            node: (
+              <div className="trust-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>
+                Slack
+              </div>
+            )
+          }
+        ]}
+        speed={30}
+        direction="left"
+        logoHeight={32}
+        gap={40}
+      />
     </div>
   </div>
 </section>
@@ -1246,11 +1293,11 @@ export function LandingPageComponent({ loggingIn, handleGitHubLogin }) {
       GitInsight helps turn development activity into a clearer understanding of your projects, teams and progress.
     </p>
     <div className="btn-group btn-group--center reveal reveal-delay-2">
-      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn btn-github">
+      <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }} className="btn btn-github cursor-target">
         <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
         Get Started with GitHub
       </a>
-      <a href="#product" className="btn btn-secondary">Explore the Platform</a>
+      <a href="#product" className="btn btn-secondary cursor-target">Explore the Platform</a>
     </div>
   </div>
 </section>
