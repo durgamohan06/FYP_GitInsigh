@@ -175,7 +175,7 @@ export function SteppedBarChart({
     });
   }, [processedData, niceMax, usableBarH, chartFloor, colWidth, barMargin, barWidth, yAxisWidth]);
 
-  // Which bar should be the highlighted solid blue bar?
+  // Which bar should be the highlighted solid orange bar?
   // If hovered -> that bar.
   // Else if activeId provided -> that bar.
   // Else default to the 3rd bar (index 2) or median bar if >= 3 columns (matching reference image!)
@@ -219,7 +219,7 @@ export function SteppedBarChart({
             onClick={() => setIsFunnelSort(!isFunnelSort)}
             className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5 cursor-pointer ${
               isFunnelSort
-                ? "bg-blue-500/10 text-blue-600 dark:text-cyan-400 border-blue-500/30 font-semibold shadow-xs"
+                ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/30 font-semibold shadow-xs"
                 : "bg-zinc-100 dark:bg-white/[0.04] text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/[0.08] hover:text-foreground"
             }`}
             title="Toggle between waterfall rank and original order"
@@ -265,7 +265,7 @@ export function SteppedBarChart({
           {/* Metric Selector Dropdown if provided */}
           {metricOptions && onMetricChange && (
             <select
-              className="h-8 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-800 px-2.5 text-xs font-medium text-zinc-800 dark:text-zinc-200 cursor-pointer shadow-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+              className="h-8 rounded-lg border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-800 px-2.5 text-xs font-medium text-zinc-800 dark:text-zinc-200 cursor-pointer shadow-xs focus:outline-hidden focus:ring-1 focus:ring-orange-500"
               value={currentMetric}
               onChange={(e) => onMetricChange(e.target.value)}
               aria-label="Select metric"
@@ -501,10 +501,9 @@ export function SteppedBarChart({
                       y1={y1}
                       x2={x2}
                       y2={y2}
-                      stroke="#93c5fd"
-                      strokeWidth="1.6"
+                      stroke="#fb923c"
+                      strokeWidth="1.8"
                       strokeLinecap="round"
-                      className="dark:stroke-cyan-300"
                     />
 
                     {/* Subtle vertical step wall boundary line */}
@@ -513,9 +512,9 @@ export function SteppedBarChart({
                       y1={y1}
                       x2={x1}
                       y2={y2}
-                      stroke="#3b82f6"
-                      strokeWidth="1.2"
-                      strokeOpacity="0.4"
+                      stroke="#ea580c"
+                      strokeWidth="1.4"
+                      strokeOpacity="0.5"
                     />
                   </g>
                 );
@@ -533,19 +532,18 @@ export function SteppedBarChart({
                       y1={y1}
                       x2={x2}
                       y2={y2}
-                      stroke="#93c5fd"
-                      strokeWidth="1.6"
+                      stroke="#fb923c"
+                      strokeWidth="1.8"
                       strokeLinecap="round"
-                      className="dark:stroke-cyan-300"
                     />
                     <line
                       x1={x2}
                       y1={y1}
                       x2={x2}
                       y2={y2}
-                      stroke="#3b82f6"
-                      strokeWidth="1.2"
-                      strokeOpacity="0.4"
+                      stroke="#ea580c"
+                      strokeWidth="1.4"
+                      strokeOpacity="0.5"
                     />
                   </g>
                 );
@@ -623,9 +621,9 @@ export function SteppedBarChart({
                         y1={col.barTop}
                         x2={col.barRight}
                         y2={col.barTop}
-                        stroke="#93c5fd"
-                        strokeWidth="1.5"
-                        strokeOpacity="0.8"
+                        stroke="#fed7aa"
+                        strokeWidth="1.8"
+                        strokeOpacity="0.9"
                       />
                     </g>
                   )}
@@ -760,7 +758,7 @@ export function SteppedBarChart({
               className="w-3 h-3 rounded-xs inline-block"
               style={{
                 backgroundImage:
-                  "repeating-linear-gradient(45deg, #2563eb, #2563eb 2px, #3b82f6 2px, #3b82f6 4px)",
+                  "repeating-linear-gradient(45deg, #ea580c, #ea580c 2px, #f97316 2px, #f97316 4px)",
               }}
             />
             <span>Stepped contributors</span>
