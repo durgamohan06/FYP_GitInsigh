@@ -11,8 +11,15 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-2xl bg-card border border-border shadow-sm ${lift ? "card-lift" : ""} ${className}`}
+      className={`relative rounded-2xl bg-card border border-zinc-200/80 dark:border-white/[0.08] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_10px_25px_-5px_rgba(0,0,0,0.04)] dark:shadow-lg dark:shadow-black/40 backdrop-blur-xl ${
+        lift ? "card-lift" : ""
+      } ${className}`}
     >
+      {/* Subtle top rim light */}
+      <div 
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-zinc-200 dark:via-white/[0.12] to-transparent pointer-events-none rounded-t-2xl" 
+        aria-hidden="true" 
+      />
       {children}
     </div>
   );
@@ -28,16 +35,16 @@ export function Badge({
   className?: string;
 }) {
   const map: Record<string, string> = {
-    default: "bg-muted text-muted-foreground",
-    success: "bg-success/15 text-success",
-    warning: "bg-warning/15 text-warning",
-    danger: "bg-danger/15 text-danger",
-    brand: "bg-brand/15 text-brand",
-    cyan: "bg-accent-cyan/15 text-accent-cyan",
+    default: "bg-zinc-100 dark:bg-white/[0.04] text-zinc-700 dark:text-zinc-400 border-zinc-200 dark:border-white/[0.08]",
+    success: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
+    warning: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25",
+    danger: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25",
+    brand: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/25",
+    cyan: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/25",
   };
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${map[tone]} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-mono font-medium border ${map[tone]} ${className}`}
     >
       {children}
     </span>
@@ -62,7 +69,7 @@ export function CountUp({ value, duration = 900 }: { value: number; duration?: n
 
 export function Sparkline({
   data,
-  color = "var(--color-brand)",
+  color = "#f97316",
 }: {
   data: readonly number[] | number[];
   color?: string;
@@ -77,22 +84,22 @@ export function Sparkline({
     .join(" ");
   const id = useRef(`sp-${Math.random().toString(36).slice(2)}`).current;
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-8">
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-8 overflow-visible">
       <defs>
         <linearGradient id={id} x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.4" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
+          <stop offset="0%" stopColor={color} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.0" />
         </linearGradient>
       </defs>
+      <polygon points={`0,${h} ${pts} ${w},${h}`} fill={`url(#${id})`} />
       <polyline
         points={pts}
         fill="none"
         stroke={color}
-        strokeWidth="1.75"
+        strokeWidth="1.8"
         strokeLinejoin="round"
         strokeLinecap="round"
       />
-      <polygon points={`0,${h} ${pts} ${w},${h}`} fill={`url(#${id})`} />
     </svg>
   );
 }
@@ -100,7 +107,7 @@ export function Sparkline({
 export function CircularProgress({
   value,
   size = 180,
-  stroke = 14,
+  stroke = 12,
   label,
   sublabel,
 }: {
@@ -123,18 +130,28 @@ export function CircularProgress({
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id="cp-grad" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stopColor="var(--color-brand)" />
-            <stop offset="100%" stopColor="var(--color-brand-2)" />
+            <stop offset="0%" stopColor="#ff6525" />
+            <stop offset="50%" stopColor="#f97316" />
+            <stop offset="100%" stopColor="#fb923c" />
           </linearGradient>
+          <filter id="gaugeGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
+        {/* Outer subtle glow ring */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke="var(--color-muted)"
+          stroke="rgba(255,255,255,0.06)"
           strokeWidth={stroke}
           fill="none"
         />
+        {/* Animated Progress Arc */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -145,16 +162,17 @@ export function CircularProgress({
           fill="none"
           strokeDasharray={c}
           strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1)" }}
+          filter="url(#gaugeGlow)"
+          style={{ transition: "stroke-dashoffset 1.4s cubic-bezier(0.16, 1, 0.3, 1)" }}
         />
       </svg>
       <div className="absolute inset-0 grid place-items-center text-center">
         <div>
-          <div className="text-4xl font-semibold tracking-tight">
+          <div className="text-4xl font-mono font-bold tracking-tight text-white drop-shadow-sm">
             <CountUp value={value} />%
           </div>
-          {label && <div className="text-sm font-medium mt-1">{label}</div>}
-          {sublabel && <div className="text-xs text-muted-foreground">{sublabel}</div>}
+          {label && <div className="text-xs font-medium text-zinc-300 mt-1">{label}</div>}
+          {sublabel && <div className="text-[11px] text-zinc-500 font-mono mt-0.5">{sublabel}</div>}
         </div>
       </div>
     </div>
@@ -170,13 +188,16 @@ export function Button({
   variant?: "primary" | "secondary" | "ghost" | "outline";
 }) {
   const base =
-    "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl text-sm font-medium transition-all disabled:opacity-50";
+    "inline-flex items-center justify-center gap-2 h-9 px-4 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
   const map = {
     primary:
-      "bg-brand-gradient text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/30 hover:-translate-y-0.5",
-    secondary: "bg-card border border-border hover:bg-accent",
-    outline: "border border-border hover:bg-accent",
-    ghost: "hover:bg-accent",
+      "bg-orange-600 hover:bg-orange-500 text-white font-semibold shadow-[0_0_20px_-3px_rgba(234,88,12,0.45)] border border-orange-400/30 hover:shadow-[0_0_28px_-2px_rgba(234,88,12,0.6)]",
+    secondary:
+      "bg-zinc-100 hover:bg-zinc-200/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] text-zinc-800 hover:text-zinc-950 dark:text-zinc-200 dark:hover:text-white border border-zinc-200 dark:border-white/[0.08] hover:border-zinc-300 dark:hover:border-white/[0.16] shadow-sm",
+    outline:
+      "border border-zinc-200 dark:border-white/[0.1] text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/[0.05]",
+    ghost:
+      "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/[0.06]",
   };
   return (
     <button className={`${base} ${map[variant]} ${className}`} {...rest}>

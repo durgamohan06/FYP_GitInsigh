@@ -102,49 +102,49 @@
 }
 
 .dark {
-  --background: oklch(0.16 0.025 265);
-  --foreground: oklch(0.97 0.005 250);
+  --background: oklch(0.12 0.005 260); /* #070709 deep obsidian */
+  --foreground: oklch(0.98 0.002 260);
 
-  --card: oklch(0.21 0.03 265);
-  --card-foreground: oklch(0.97 0.005 250);
-  --popover: oklch(0.21 0.03 265);
-  --popover-foreground: oklch(0.97 0.005 250);
+  --card: oklch(0.15 0.006 260); /* #0c0c10 carbon card */
+  --card-foreground: oklch(0.98 0.002 260);
+  --popover: oklch(0.15 0.006 260);
+  --popover-foreground: oklch(0.98 0.002 260);
 
-  --primary: oklch(0.68 0.19 265);
-  --primary-foreground: oklch(0.16 0.025 265);
+  --primary: oklch(0.68 0.21 45); /* #f97316 warm amber-orange */
+  --primary-foreground: oklch(0.12 0 0);
 
-  --secondary: oklch(0.26 0.03 265);
-  --secondary-foreground: oklch(0.97 0.005 250);
+  --secondary: oklch(0.18 0.008 260);
+  --secondary-foreground: oklch(0.96 0.002 260);
 
-  --muted: oklch(0.24 0.03 265);
-  --muted-foreground: oklch(0.72 0.03 260);
+  --muted: oklch(0.18 0.006 260);
+  --muted-foreground: oklch(0.68 0.01 260); /* crisp zinc-400 */
 
-  --accent: oklch(0.28 0.04 270);
-  --accent-foreground: oklch(0.97 0.005 250);
+  --accent: oklch(0.20 0.008 260);
+  --accent-foreground: oklch(0.98 0.002 260);
 
   --destructive: oklch(0.65 0.22 27);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.68 0.19 265);
+  --border: oklch(1 0 0 / 7%); /* razor hairline border */
+  --input: oklch(1 0 0 / 9%);
+  --ring: oklch(0.68 0.21 45);
 
-  --brand: oklch(0.68 0.19 265);
-  --brand-foreground: oklch(0.14 0.02 265);
-  --brand-2: oklch(0.68 0.22 300);
+  --brand: oklch(0.68 0.21 45); /* #f97316 GitInsight signature glow */
+  --brand-foreground: oklch(0.12 0 0);
+  --brand-2: oklch(0.72 0.19 60); /* #fb923c */
   --accent-cyan: oklch(0.78 0.13 210);
   --success: oklch(0.75 0.18 145);
   --warning: oklch(0.82 0.16 70);
   --danger: oklch(0.7 0.22 27);
 
-  --sidebar: oklch(0.18 0.025 265);
-  --sidebar-foreground: oklch(0.94 0.008 250);
-  --sidebar-primary: oklch(0.68 0.19 265);
-  --sidebar-primary-foreground: oklch(0.14 0.02 265);
-  --sidebar-accent: oklch(0.24 0.03 265);
-  --sidebar-accent-foreground: oklch(0.97 0.005 250);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.68 0.19 265);
+  --sidebar: oklch(0.10 0.005 260); /* #060608 deep sidebar */
+  --sidebar-foreground: oklch(0.92 0.005 260);
+  --sidebar-primary: oklch(0.68 0.21 45);
+  --sidebar-primary-foreground: oklch(0.12 0 0);
+  --sidebar-accent: oklch(0.17 0.006 260);
+  --sidebar-accent-foreground: oklch(0.98 0.002 260);
+  --sidebar-border: oklch(1 0 0 / 7%);
+  --sidebar-ring: oklch(0.68 0.21 45);
 }
 
 @layer base {
@@ -172,19 +172,19 @@
   color: transparent;
 }
 @utility glass-card {
-  background-color: color-mix(in oklab, var(--color-card) 80%, transparent);
+  background-color: color-mix(in oklab, var(--color-card) 85%, transparent);
   backdrop-filter: blur(14px);
-  border: 1px solid color-mix(in oklab, var(--color-border) 80%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-border) 90%, transparent);
 }
 @utility card-lift {
   transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.25s ease;
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px -12px color-mix(in oklab, var(--color-brand) 25%, transparent);
-    border-color: color-mix(in oklab, var(--color-brand) 30%, var(--color-border));
+    box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.9), 0 0 25px -4px rgba(249, 115, 22, 0.15);
+    border-color: rgba(249, 115, 22, 0.35);
   }
 }
 
@@ -234,4 +234,313 @@
   background-size: 800px 100%;
   animation: shimmer 1.8s infinite linear;
 }
+
+/* Hide native scrollbars completely across cards and page */
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* =========================================================================
+   CodeRabbit-Style Hero Character Diff Phrase Cycle Animation (1.5s Cycle)
+   Replicates character-by-character staggered sliding with Git diff syntax colors
+   ========================================================================= */
+.hero-phrase-cycle {
+  vertical-align: baseline;
+  white-space: nowrap;
+  display: inline-grid;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-phrase-item {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  white-space: pre;
+}
+
+.hero-phrase-char {
+  white-space: pre;
+  display: inline-grid;
+  position: relative;
+  overflow: clip;
+  vertical-align: baseline;
+}
+
+.hero-phrase-motion {
+  opacity: 0;
+  transform: translate3d(0, var(--slide-in, 115%), 0);
+  animation-duration: 4.5s;
+  animation-delay: calc(1.5s + var(--character-delay, 0s));
+  grid-area: 1 / 1;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+  position: relative;
+  will-change: transform, opacity;
+}
+
+.hero-phrase-item:first-child .hero-phrase-motion {
+  opacity: 1;
+  animation-name: hero-phrase-first-character;
+  transform: translate3d(0px, 0px, 0);
+}
+
+.hero-phrase-item:nth-child(2) .hero-phrase-motion {
+  animation-name: hero-phrase-second-character;
+}
+
+.hero-phrase-item:nth-child(3) .hero-phrase-motion {
+  animation-name: hero-phrase-third-character;
+}
+
+.hero-phrase-motion[data-has-color="true"]::after {
+  content: attr(data-character);
+  color: #22c55e; /* git diff-add green */
+  opacity: 0;
+  animation-duration: 4.5s;
+  animation-delay: calc(1.5s + var(--character-delay, 0s));
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+.hero-phrase-char[data-accent="negative"] .hero-phrase-motion::after {
+  color: #ef4444; /* git diff-delete red */
+}
+
+.hero-phrase-item:first-child .hero-phrase-motion::after {
+  animation-name: hero-phrase-first-color;
+}
+
+.hero-phrase-item:nth-child(2) .hero-phrase-motion::after {
+  animation-name: hero-phrase-second-color;
+}
+
+.hero-phrase-item:nth-child(3) .hero-phrase-motion::after {
+  animation-name: hero-phrase-third-color;
+}
+
+/* Character sliding keyframes (1.5s per item in 4.5s loop: 33.333% each, 300ms transition = 6.666%) */
+@keyframes hero-phrase-first-character {
+  0% {
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translate3d(0px, 0px, 0);
+  }
+  6.666% {
+    opacity: 1;
+    transform: translate3d(0, var(--slide-out, -115%), 0);
+  }
+  6.667%, 66.666% {
+    opacity: 0;
+    transform: translate3d(0, var(--slide-in, 115%), 0);
+  }
+  66.667% {
+    opacity: 1;
+    transform: translate3d(0, var(--slide-in, 115%), 0);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  73.333%, 100% {
+    opacity: 1;
+    transform: translate3d(0px, 0px, 0);
+  }
+}
+
+@keyframes hero-phrase-second-character {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, var(--slide-in, 115%), 0);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  6.666%, 33.332% {
+    opacity: 1;
+    transform: translate3d(0px, 0px, 0);
+  }
+  33.333% {
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translate3d(0px, 0px, 0);
+  }
+  40.000% {
+    opacity: 1;
+    transform: translate3d(0, var(--slide-out, -115%), 0);
+  }
+  40.001%, 100% {
+    opacity: 0;
+    transform: translate3d(0, var(--slide-in, 115%), 0);
+  }
+}
+
+@keyframes hero-phrase-third-character {
+  0%, 33.332% {
+    opacity: 0;
+    transform: translate3d(0, var(--slide-in, 115%), 0);
+  }
+  33.333% {
+    opacity: 1;
+    transform: translate3d(0, var(--slide-in, 115%), 0);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  40.000%, 66.666% {
+    opacity: 1;
+    transform: translate3d(0px, 0px, 0);
+  }
+  66.667% {
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translate3d(0px, 0px, 0);
+  }
+  73.333% {
+    opacity: 1;
+    transform: translate3d(0, var(--slide-out, -115%), 0);
+  }
+  73.334%, 100% {
+    opacity: 0;
+    transform: translate3d(0, var(--slide-in, 115%), 0);
+  }
+}
+
+/* Diff color highlight flash keyframes */
+@keyframes hero-phrase-first-color {
+  0%, 66.666% {
+    opacity: 0;
+  }
+  66.667%, 69.000% {
+    opacity: 1;
+  }
+  69.001% {
+    opacity: 1;
+    animation-timing-function: ease-out;
+  }
+  73.333%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes hero-phrase-second-color {
+  0%, 2.500% {
+    opacity: 1;
+  }
+  2.501% {
+    opacity: 1;
+    animation-timing-function: ease-out;
+  }
+  6.666%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes hero-phrase-third-color {
+  0%, 33.332% {
+    opacity: 0;
+  }
+  33.333%, 35.800% {
+    opacity: 1;
+  }
+  35.801% {
+    opacity: 1;
+    animation-timing-function: ease-out;
+  }
+  40.000%, 100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-phrase-motion, .hero-phrase-motion::after {
+    opacity: 0 !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  .hero-phrase-item:first-child .hero-phrase-motion {
+    opacity: 1 !important;
+  }
+}
+
+/* =========================================================================
+   Live Repository Dashboard Animated Activity Bars
+   Oscillates bar heights smoothly up and down with staggered delays
+   ========================================================================= */
+@keyframes barWaveUpAndDown {
+  0%, 100% {
+    transform: scaleY(0.62);
+    opacity: 0.85;
+  }
+  40% {
+    transform: scaleY(1.0);
+    opacity: 1;
+  }
+  75% {
+    transform: scaleY(0.52);
+    opacity: 0.75;
+  }
+}
+
+@keyframes barWaveUpAndDownAlt {
+  0%, 100% {
+    transform: scaleY(0.96);
+    opacity: 1;
+  }
+  35% {
+    transform: scaleY(0.56);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scaleY(1.02);
+    opacity: 1;
+  }
+}
+
+.animate-bar-fluctuate {
+  transform-origin: bottom;
+  animation: barWaveUpAndDown 2.2s ease-in-out infinite;
+  animation-delay: var(--bar-delay, 0s);
+  will-change: transform, opacity;
+}
+
+.animate-bar-fluctuate-alt {
+  transform-origin: bottom;
+  animation: barWaveUpAndDownAlt 2.5s ease-in-out infinite;
+  animation-delay: var(--bar-delay, 0s);
+  will-change: transform, opacity;
+}
+
+/* =========================================================================
+   Continuous Seamless Logo Marquee
+   ========================================================================= */
+@keyframes continuousMarquee {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-continuous-marquee {
+  display: flex;
+  width: max-content;
+  animation: continuousMarquee 24s linear infinite;
+  will-change: transform;
+}
+
+.animate-continuous-marquee:hover {
+  animation-play-state: paused;
+}
+
+
+
+
+
 
