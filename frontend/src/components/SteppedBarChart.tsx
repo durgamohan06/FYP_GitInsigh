@@ -175,20 +175,14 @@ export function SteppedBarChart({
     });
   }, [processedData, niceMax, usableBarH, chartFloor, colWidth, barMargin, barWidth, yAxisWidth]);
 
-  // Which bar should be the highlighted solid orange bar?
-  // If hovered -> that bar.
-  // Else if activeId provided -> that bar.
-  // Else default to the 3rd bar (index 2) or median bar if >= 3 columns (matching reference image!)
-  const highlightedIndex = useMemo(() => {
+  // Selected/active column index (from activeId or hover)
+  const activeColIdx = useMemo(() => {
     if (hoveredIdx !== null) return hoveredIdx;
     if (activeId) {
       const idx = columns.findIndex((c) => c.item.id === activeId);
       if (idx !== -1) return idx;
     }
-    if (columns.length >= 3) {
-      return 2; // Exact 3rd column highlighted as in the reference image
-    }
-    return 0;
+    return null;
   }, [hoveredIdx, activeId, columns]);
 
   return (
@@ -281,7 +275,7 @@ export function SteppedBarChart({
       </div>
 
       {/* ── Main SVG Canvas Container ── */}
-      <div className="relative w-full overflow-x-auto overflow-y-visible">
+      <div className="relative w-full pt-10 overflow-x-auto overflow-y-visible">
         <svg
           viewBox={`0 0 ${containerWidth} ${chartHeight}`}
           width="100%"
@@ -319,35 +313,47 @@ export function SteppedBarChart({
 
             {/* 4. Column Track / Lane frosted gradient (Default) */}
             <linearGradient id={`lane-grad-${uid}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f97316" stopOpacity="0.06" />
-              <stop offset="40%" stopColor="#f97316" stopOpacity="0.025" />
+              <stop offset="0%" stopColor="#f97316" stopOpacity="0.05" />
+              <stop offset="50%" stopColor="#f97316" stopOpacity="0.02" />
               <stop offset="100%" stopColor="#f97316" stopOpacity="0.005" />
             </linearGradient>
 
-            {/* 5. Hover Column Lane Gradient (Warm frosted orange box formed BEHIND the bar) */}
-            <linearGradient id={`lane-hover-orange-${uid}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f97316" stopOpacity="0.16" />
-              <stop offset="50%" stopColor="#f97316" stopOpacity="0.07" />
-              <stop offset="100%" stopColor="#f97316" stopOpacity="0.02" />
+            {/* 5. Hover Card Gradient: Fades and disappears as it reaches the top (0 opacity at top) */}
+            <linearGradient id={`card-back-orange-${uid}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ea580c" stopOpacity="0" />
+              <stop offset="30%" stopColor="#ea580c" stopOpacity="0.04" />
+              <stop offset="60%" stopColor="#f97316" stopOpacity="0.15" />
+              <stop offset="85%" stopColor="#f97316" stopOpacity="0.26" />
+              <stop offset="100%" stopColor="#ea580c" stopOpacity="0.34" />
             </linearGradient>
 
-            {/* 6. Active Focus Lane Gradient */}
-            <linearGradient id={`lane-active-orange-${uid}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f97316" stopOpacity="0.10" />
-              <stop offset="100%" stopColor="#f97316" stopOpacity="0.02" />
+            {/* 6. Hover Card Stroke Gradient: Zero line at the top, fades in toward the bar */}
+            <linearGradient id={`card-stroke-orange-${uid}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ea580c" stopOpacity="0" />
+              <stop offset="40%" stopColor="#ea580c" stopOpacity="0" />
+              <stop offset="75%" stopColor="#ea580c" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#ea580c" stopOpacity="0.65" />
             </linearGradient>
 
-            {/* 7. 3D Step Drop Slope Facet Gradient (Warm amber to orange) */}
-            <linearGradient id={`facet-grad-${uid}`} x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#fed7aa" stopOpacity="0.70" />
-              <stop offset="50%" stopColor="#fb923c" stopOpacity="0.40" />
-              <stop offset="100%" stopColor="#ea580c" stopOpacity="0.18" />
-            </linearGradient>
-
-            {/* Soft Warm Orange Glow Filter for Active/Hovered Bar */}
-            <filter id={`orange-glow-${uid}`} x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#f97316" floodOpacity="0.45" />
+            {/* Soft Card Shadow Filter for Back Card */}
+            <filter id={`back-card-shadow-${uid}`} x="-15%" y="-10%" width="130%" height="120%">
+              <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#ea580c" floodOpacity="0.16" />
             </filter>
+
+            {/* 7. 3D Side Layer / Drop Facet Gradient (Rich 3D depth for the side of each bar) */}
+            <linearGradient id={`facet-grad-${uid}`} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#fed7aa" stopOpacity="0.80" />
+              <stop offset="25%" stopColor="#fb923c" stopOpacity="0.55" />
+              <stop offset="65%" stopColor="#ea580c" stopOpacity="0.40" />
+              <stop offset="100%" stopColor="#c2410c" stopOpacity="0.30" />
+            </linearGradient>
+
+            {/* 8. Side Depth Ambient Shadow Gradient */}
+            <linearGradient id={`side-shadow-${uid}`} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#000000" stopOpacity="0.04" />
+              <stop offset="50%" stopColor="#000000" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#000000" stopOpacity="0.22" />
+            </linearGradient>
           </defs>
 
           {/* ── Y-Axis Gridlines & Tick Labels ── */}
@@ -386,64 +392,50 @@ export function SteppedBarChart({
           <g className="column-tracks">
             {columns.map((col) => {
               const isHovered = hoveredIdx === col.index;
-              const isSolidHighlight = col.index === highlightedIndex;
+              const isActive = activeColIdx === col.index;
+              const showOrangeBackCard = isHovered || isActive;
+
+              const isLast = col.index === columns.length - 1;
+              const nextCol = !isLast ? columns[col.index + 1] : null;
+              const defaultSideWidth = Math.max(14, Math.min(22, col.colWidth * 0.16));
+
+              const xL = col.barLeft;
+              const xR = nextCol
+                ? nextCol.barLeft
+                : Math.min(containerWidth - rightPadding, col.barRight + defaultSideWidth);
+              const topY = 10;
+              const r = 8;
+              const ySlopeEnd = nextCol
+                ? nextCol.barTop
+                : Math.min(chartFloor, col.barTop + (chartFloor - col.barTop) * 0.6);
+
+              // Path defining the hover card placed strictly in the upper region annotated by the user:
+              // Encloses the contributor name & value, bottoms out at the top edge of the bar and slopes down the side layer
+              const cardPath = `
+                M ${xL + r} ${topY}
+                L ${xR - r} ${topY}
+                A ${r} ${r} 0 0 1 ${xR} ${topY + r}
+                L ${xR} ${ySlopeEnd}
+                L ${col.barRight} ${col.barTop}
+                L ${xL} ${col.barTop}
+                L ${xL} ${topY + r}
+                A ${r} ${r} 0 0 1 ${xL + r} ${topY}
+                Z
+              `;
 
               return (
                 <g key={`track-${col.item.id}`}>
-                  {/* The Box Formed from BEHIND:
-                      When hovering on a specific bar, this full-height box forms from BEHIND the bar!
-                      Nothing is rendered on top of or covering the bar. */}
-                  {isHovered ? (
-                    <g>
-                      {/* Highlighted warm orange box card BEHIND the bar */}
-                      <rect
-                        x={col.colLeft + 2}
-                        y={topHeaderH - 10}
-                        width={col.colWidth - 4}
-                        height={chartFloor - topHeaderH + 12}
-                        fill={`url(#lane-hover-orange-${uid})`}
-                        stroke="#f97316"
-                        strokeWidth="1.5"
-                        strokeOpacity="0.5"
-                        rx="6"
+                  {/* Hover Card placed strictly in the white annotated upper area above the bar */}
+                  {showOrangeBackCard && (
+                    <g filter={`url(#back-card-shadow-${uid})`}>
+                      <path
+                        d={cardPath}
+                        fill={`url(#card-back-orange-${uid})`}
+                        stroke={`url(#card-stroke-orange-${uid})`}
+                        strokeWidth="1.2"
                         className="transition-all duration-200"
                       />
-                      {/* Subtle top indicator pip behind header */}
-                      <rect
-                        x={col.colLeft + 8}
-                        y={topHeaderH - 9}
-                        width={col.colWidth - 16}
-                        height="3"
-                        fill="#f97316"
-                        rx="1.5"
-                      />
                     </g>
-                  ) : isSolidHighlight ? (
-                    /* Background box behind the active focus bar */
-                    <rect
-                      x={col.colLeft + 2}
-                      y={topHeaderH - 10}
-                      width={col.colWidth - 4}
-                      height={chartFloor - topHeaderH + 12}
-                      fill={`url(#lane-active-orange-${uid})`}
-                      stroke="rgba(249, 115, 22, 0.25)"
-                      strokeWidth="1"
-                      rx="6"
-                      className="transition-all duration-200"
-                    />
-                  ) : (
-                    /* Default frosted vertical column lane */
-                    <rect
-                      x={col.colLeft + 2}
-                      y={topHeaderH - 8}
-                      width={col.colWidth - 4}
-                      height={chartFloor - topHeaderH + 8}
-                      fill={`url(#lane-grad-${uid})`}
-                      stroke="currentColor"
-                      className="text-zinc-200/60 dark:text-white/[0.05]"
-                      strokeWidth="1"
-                      rx="3"
-                    />
                   )}
 
                   {/* Vertical lane separators */}
@@ -473,89 +465,89 @@ export function SteppedBarChart({
             )}
           </g>
 
-          {/* ── 3D Funnel Stepped Facets / Connecting Slopes (Reference Design) ── */}
-          <g className="stepped-slopes">
+          {/* ── 3D Stepped Side Layers / Drop Facets for EACH Bar (Reference Design) ── */}
+          <g className="bar-side-layers">
             {columns.map((col, idx) => {
-              if (idx === columns.length - 1) return null;
-              const nextCol = columns[idx + 1];
+              const isLast = idx === columns.length - 1;
+              const nextCol = !isLast ? columns[idx + 1] : null;
 
               const x1 = col.barRight;
               const y1 = col.barTop;
-              const x2 = nextCol.barLeft;
-              const y2 = nextCol.barTop;
 
-              // When bar 1 is taller than bar 2 (descending step):
-              if (y1 <= y2) {
-                return (
-                  <g key={`slope-${col.item.id}-${nextCol.item.id}`}>
-                    {/* Shaded drop-wall facet polygon */}
-                    <polygon
-                      points={`${x1},${y1} ${x2},${y2} ${x1},${y2}`}
-                      fill={`url(#facet-grad-${uid})`}
-                      className="transition-all duration-300"
-                    />
+              // For connecting bars: x2 and y2 are nextCol's barLeft and barTop.
+              // For the last bar: x2 is col.barRight + sideWidth, and y2 slopes down towards the floor.
+              const defaultSideWidth = Math.max(14, Math.min(22, colWidth * 0.16));
+              const x2 = nextCol
+                ? nextCol.barLeft
+                : Math.min(containerWidth - rightPadding, col.barRight + defaultSideWidth);
+              const y2 = nextCol
+                ? nextCol.barTop
+                : Math.min(chartFloor, col.barTop + (chartFloor - col.barTop) * 0.6);
 
-                    {/* Crisp upper slope highlight line */}
-                    <line
-                      x1={x1}
-                      y1={y1}
-                      x2={x2}
-                      y2={y2}
-                      stroke="#fb923c"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                    />
+              const isHovered = hoveredIdx === col.index;
+              const isActive = activeColIdx === col.index;
+              const isHighlighted = isHovered || isActive;
 
-                    {/* Subtle vertical step wall boundary line */}
-                    <line
-                      x1={x1}
-                      y1={y1}
-                      x2={x1}
-                      y2={y2}
-                      stroke="#ea580c"
-                      strokeWidth="1.4"
-                      strokeOpacity="0.5"
-                    />
-                  </g>
-                );
-              } else {
-                // When stepping up:
-                return (
-                  <g key={`slope-${col.item.id}-${nextCol.item.id}`}>
-                    <polygon
-                      points={`${x1},${y1} ${x2},${y2} ${x2},${y1}`}
-                      fill={`url(#facet-grad-${uid})`}
-                      className="transition-all duration-300"
-                    />
-                    <line
-                      x1={x1}
-                      y1={y1}
-                      x2={x2}
-                      y2={y2}
-                      stroke="#fb923c"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                    />
-                    <line
-                      x1={x2}
-                      y1={y1}
-                      x2={x2}
-                      y2={y2}
-                      stroke="#ea580c"
-                      strokeWidth="1.4"
-                      strokeOpacity="0.5"
-                    />
-                  </g>
-                );
-              }
+              return (
+                <g key={`side-layer-${col.item.id}`}>
+                  {/* Full-height 3D side layer facet (quadrilateral from top slope all the way down to floor) */}
+                  <polygon
+                    points={`${x1},${y1} ${x2},${y2} ${x2},${chartFloor} ${x1},${chartFloor}`}
+                    fill={`url(#facet-grad-${uid})`}
+                    className="transition-all duration-300"
+                  />
+
+                  {/* 3D ambient depth shadow on side face */}
+                  <polygon
+                    points={`${x1},${y1} ${x2},${y2} ${x2},${chartFloor} ${x1},${chartFloor}`}
+                    fill={`url(#side-shadow-${uid})`}
+                    className="transition-all duration-300"
+                    pointerEvents="none"
+                  />
+
+                  {/* Crisp top slanted highlight rim connecting top rims */}
+                  <line
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke="#fed7aa"
+                    strokeWidth={isHighlighted ? "2.6" : "2"}
+                    strokeLinecap="round"
+                  />
+
+                  {/* Vertical crease boundary line between front face of bar and its side layer */}
+                  <line
+                    x1={x1}
+                    y1={y1}
+                    x2={x1}
+                    y2={chartFloor}
+                    stroke="#ea580c"
+                    strokeWidth="1.5"
+                    strokeOpacity={isHighlighted ? 0.95 : 0.65}
+                  />
+
+                  {/* Right edge boundary line of the side layer */}
+                  <line
+                    x1={x2}
+                    y1={y2}
+                    x2={x2}
+                    y2={chartFloor}
+                    stroke="#ea580c"
+                    strokeWidth="1.2"
+                    strokeOpacity={0.4}
+                  />
+                </g>
+              );
             })}
           </g>
 
-          {/* ── The Bars (Striped Pattern + Solid Highlight Bar) ── */}
+          {/* ── The Bars (All Bars in Signature Brand Orange Stripes - Zero Solid Cards on the Front) ── */}
           <g className="bars">
             {columns.map((col) => {
-              const isSolidHighlight = col.index === highlightedIndex;
               const isHovered = hoveredIdx === col.index;
+              const isActive = activeColIdx === col.index;
+              const isSolid = isHovered || isActive;
 
               return (
                 <g
@@ -568,9 +560,9 @@ export function SteppedBarChart({
                   onMouseEnter={() => setHoveredIdx(col.index)}
                   onMouseLeave={() => setHoveredIdx(null)}
                 >
-                  {isSolidHighlight ? (
-                    /* ── Solid Radiant Brand Orange Bar (GitInsight's signature accent / Active state) ── */
-                    <g filter={`url(#orange-glow-${uid})`}>
+                  {isSolid ? (
+                    /* ── Solid Radiant Orange Bar (Only in Orange, NO STRIPES when hovered!) ── */
+                    <g>
                       <rect
                         x={col.barLeft}
                         y={col.barTop}
@@ -592,9 +584,9 @@ export function SteppedBarChart({
                       />
                     </g>
                   ) : (
-                    /* ── Diagonal Striped Pattern Bar (Bars in reference image) ── */
+                    /* ── Orange Diagonal Striped Bar (Default state) ── */
                     <g>
-                      {/* Diagonal stripe patterned fill */}
+                      {/* Diagonal striped orange pattern fill */}
                       <rect
                         x={col.barLeft}
                         y={col.barTop}
@@ -615,7 +607,7 @@ export function SteppedBarChart({
                         pointerEvents="none"
                       />
 
-                      {/* Crisp top edge */}
+                      {/* Crisp peach top edge rim highlight */}
                       <line
                         x1={col.barLeft}
                         y1={col.barTop}
@@ -623,7 +615,7 @@ export function SteppedBarChart({
                         y2={col.barTop}
                         stroke="#fed7aa"
                         strokeWidth="1.8"
-                        strokeOpacity="0.9"
+                        strokeOpacity="0.85"
                       />
                     </g>
                   )}
@@ -635,7 +627,9 @@ export function SteppedBarChart({
           {/* ── Column Headers (Category Label + Large Metric Value) ── */}
           <g className="column-headers">
             {columns.map((col) => {
-              const isHighlighted = col.index === highlightedIndex;
+              const isHovered = hoveredIdx === col.index;
+              const isActive = activeColIdx === col.index;
+              const isHighlighted = isHovered || isActive;
               const formattedVal = col.item.formattedValue || defaultFormatValue(col.item.value);
 
               return (
@@ -657,7 +651,7 @@ export function SteppedBarChart({
                     className={`text-[12px] font-medium transition-colors select-none ${
                       isHighlighted
                         ? "fill-orange-600 dark:fill-orange-400 font-bold"
-                        : "fill-zinc-500 dark:fill-zinc-400"
+                        : "fill-zinc-600 dark:fill-zinc-400"
                     }`}
                   >
                     {col.item.label.length > 16
@@ -708,13 +702,12 @@ export function SteppedBarChart({
         {/* ── Interactive Floating Tooltip Pill (Positioned cleanly at top above the column) ── */}
         {hoveredIdx !== null && columns[hoveredIdx] && (
           <div
-            className="absolute z-30 pointer-events-none transition-all duration-150 transform -translate-x-1/2"
+            className="absolute z-30 pointer-events-none transition-all duration-150 transform -translate-x-1/2 top-1"
             style={{
               left: `${columns[hoveredIdx].colCenter}px`,
-              top: `2px`,
             }}
           >
-            <div className="bg-zinc-950/95 dark:bg-zinc-950/95 text-white px-3 py-1.5 rounded-xl shadow-2xl border border-orange-500/40 backdrop-blur-md flex items-center gap-2.5 text-xs whitespace-nowrap">
+            <div className="bg-zinc-950 text-white px-3 py-1.5 rounded-xl shadow-2xl border border-orange-500/40 backdrop-blur-md flex items-center gap-2.5 text-xs whitespace-nowrap">
               {columns[hoveredIdx].item.avatar && (
                 <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 font-bold text-[10px] grid place-items-center text-white shrink-0 shadow-xs">
                   {columns[hoveredIdx].item.avatar}
@@ -742,26 +735,37 @@ export function SteppedBarChart({
                 </div>
               </div>
             </div>
+            {/* Small downward pointer triangle */}
+            <div className="w-2 h-2 bg-zinc-950 border-r border-b border-orange-500/40 rotate-45 mx-auto -mt-1" />
           </div>
         )}
       </div>
 
       {/* ── Bottom Summary Row ── */}
       <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/[0.06] flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-        <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-xs bg-gradient-to-b from-orange-500 to-amber-600 shadow-xs inline-block" />
-            <span className="text-zinc-700 dark:text-zinc-300 font-medium">Active focus / Peak velocity</span>
-          </span>
+        <div className="flex items-center gap-4 flex-wrap">
           <span className="flex items-center gap-1.5">
             <span
-              className="w-3 h-3 rounded-xs inline-block"
+              className="w-3.5 h-3.5 rounded-xs inline-block shadow-xs border border-orange-500/30"
               style={{
                 backgroundImage:
                   "repeating-linear-gradient(45deg, #ea580c, #ea580c 2px, #f97316 2px, #f97316 4px)",
               }}
             />
-            <span>Stepped contributors</span>
+            <span className="text-zinc-700 dark:text-zinc-300 font-medium">Orange stepped bars</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span
+              className="w-3.5 h-3.5 rounded-xs inline-block shadow-xs border border-orange-500/40"
+              style={{
+                background: "linear-gradient(135deg, #fed7aa 0%, #fb923c 40%, #ea580c 100%)",
+              }}
+            />
+            <span className="text-zinc-700 dark:text-zinc-300 font-medium">3D side layers</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3.5 h-3.5 rounded-xs bg-orange-500/20 border border-orange-500/50 inline-block shadow-xs" />
+            <span>Hover card (back side)</span>
           </span>
         </div>
 
