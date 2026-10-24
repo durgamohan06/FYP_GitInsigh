@@ -1,4 +1,5 @@
-import { extractGitHubToken, type SimplifiedRepo } from "./github-api";
+import type { Request, Response } from "express";
+import { extractGitHubToken, type SimplifiedRepo } from "./github-api.js";
 import type {
   ContributorProject,
   MemberProjectSummary,
@@ -145,25 +146,27 @@ function updateLatest(current: string | null, candidate: string | null | undefin
 
 // ── Main handler ─────────────────────────────────────────────────────────────
 
-export async function handleGetTeamProjects(request: Request): Promise<Response> {
-  const token = extractGitHubToken(request);
+export async function handleGetTeamProjects(req: Request, res: Response): Promise<void> {
+  const token = extractGitHubToken(req);
   if (!token) {
-    return Response.json(
-      { error: "Unauthorized", message: "Connect GitHub to load project history." },
-      { status: 401 },
-    );
+    res.status(401).json({ error: "Unauthorized", message: "Connect GitHub to load project history." });
+    return;
   }
 
+  const contribQuery = (req.query.contributors as string) ?? "";
   const logins = [
     ...new Set(
-      (new URL(request.url).searchParams.get("contributors") ?? "")
+      contribQuery
         .split(",")
         .map((l) => l.trim())
         .filter(Boolean),
     ),
   ];
 
-  if (!logins.length) return Response.json({ projects: {} });
+  if (!logins.length) {
+    res.json({ projects: {} });
+    return;
+  }
 
   try {
     // Fetch all repos accessible to the authenticated user (owned + collaborated)
@@ -291,14 +294,12 @@ export async function handleGetTeamProjects(request: Request): Promise<Response>
       };
     }
 
-    return Response.json({ projects }, { headers: { "Cache-Control": "no-store" } });
+    res.setHeader("Cache-Control", "no-store");
+    res.json({ projects });
   } catch (error) {
-    return Response.json(
-      {
-        error: "GitHub API Error",
-        message: error instanceof Error ? error.message : "Unable to load project history.",
-      },
-      { status: 502 },
-    );
+    res.status(502).json({
+      error: "GitHub API Error",
+      message: error instanceof Error ? error.message : "Unable to load project history.",
+    });
   }
 }

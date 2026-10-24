@@ -1,5 +1,6 @@
-import { extractGitHubToken } from "./github-api";
-import { getEnv } from "../config/env";
+import type { Request, Response } from "express";
+import { extractGitHubToken } from "./github-api.js";
+import { getEnv } from "../config/env.js";
 
 export interface GitHubUserProfile {
   id: number;
@@ -26,9 +27,17 @@ export function getCookieValue(cookieHeader: string | null, name: string): strin
 /**
  * Extracts GitHub token from Cookies, Headers, or Env.
  */
-export function getAuthToken(request: Request): string | null {
-  const cookieHeader = request.headers.get("cookie") || request.headers.get("Cookie");
-  const cookieToken = getCookieValue(cookieHeader, "github_token");
+export function getAuthToken(request: Request | any): string | null {
+  let cookieHeader: string | undefined;
+  if (request?.headers) {
+    if (typeof request.headers.get === "function") {
+      cookieHeader = request.headers.get("cookie") || request.headers.get("Cookie") || undefined;
+    } else {
+      const c = request.headers["cookie"] || request.headers["Cookie"];
+      cookieHeader = Array.isArray(c) ? c.join("; ") : c;
+    }
+  }
+  const cookieToken = getCookieValue(cookieHeader ?? null, "github_token");
   if (cookieToken) return cookieToken;
 
   return extractGitHubToken(request);
@@ -37,22 +46,21 @@ export function getAuthToken(request: Request): string | null {
 /**
  * Initiates GitHub OAuth by redirecting to GitHub's authorize page.
  */
-export function handleGitHubLogin(request: Request): Response {
+export function handleGitHubLogin(req: Request, res: Response): void {
   const clientId = getEnv("GITHUB_CLIENT_ID", "Iv23liFzPGTzIk1iIXLo");
   if (!clientId) {
-    return new Response(
-      JSON.stringify({
-        error: "Configuration Error",
-        message:
-          "GITHUB_CLIENT_ID is not configured in .env. Please register an OAuth App in GitHub.",
-      }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    res.status(500).json({
+      error: "Configuration Error",
+      message:
+        "GITHUB_CLIENT_ID is not configured in .env. Please register an OAuth App in GitHub.",
+    });
+    return;
   }
 
-  const url = new URL(request.url);
+  const protocol = req.protocol ?? "http";
+  const host = req.get("host") ?? "localhost:3001";
   const redirectUri =
-    getEnv("GITHUB_CALLBACK_URL") || `${url.protocol}//${url.host}/api/auth/github/callback`;
+    getEnv("GITHUB_CALLBACK_URL") || `${protocol}://${host}/api/auth/github/callback`;
 
   const githubAuthUrl = new URL("https://github.com/login/oauth/authorize");
   githubAuthUrl.searchParams.set("client_id", clientId);
@@ -60,34 +68,33 @@ export function handleGitHubLogin(request: Request): Response {
   githubAuthUrl.searchParams.set("scope", "repo read:user user:email");
   githubAuthUrl.searchParams.set("state", Math.random().toString(36).substring(2, 15));
 
-  return Response.redirect(githubAuthUrl.toString(), 302);
+  res.redirect(githubAuthUrl.toString());
 }
 
 /**
  * Handles the OAuth Callback from GitHub.
  */
-export async function handleGitHubCallback(request: Request): Promise<Response> {
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-  const error = url.searchParams.get("error");
-  const errorDescription = url.searchParams.get("error_description");
+export async function handleGitHubCallback(req: Request, res: Response): Promise<void> {
+  const code = req.query.code as string | undefined;
+  const error = req.query.error as string | undefined;
+  const errorDescription = req.query.error_description as string | undefined;
 
   if (error || !code) {
     const errorMsg = errorDescription || error || "No authorization code received from GitHub.";
-    return new Response(
+    res.status(400).send(
       `<!DOCTYPE html><html><head><title>Authentication Failed</title><style>body{font-family:sans-serif;padding:40px;background:#0d1117;color:#fff;text-align:center}a{color:#58a6ff;text-decoration:none;font-weight:bold}</style></head><body><h2>Authentication Failed</h2><p>${errorMsg}</p><p><a href="/">Return to Login</a></p></body></html>`,
-      { status: 400, headers: { "Content-Type": "text/html" } },
     );
+    return;
   }
 
   const clientId = getEnv("GITHUB_CLIENT_ID", "Iv23liFzPGTzIk1iIXLo");
   const clientSecret = getEnv("GITHUB_CLIENT_SECRET", "2861ac935322926f58eed6b1f09f6f951551b38a");
 
   if (!clientId || !clientSecret) {
-    return new Response(
+    res.status(500).send(
       `<!DOCTYPE html><html><head><title>Configuration Missing</title><style>body{font-family:sans-serif;padding:40px;background:#0d1117;color:#fff;text-align:center}a{color:#58a6ff;text-decoration:none;font-weight:bold}</style></head><body><h2>OAuth Credentials Missing</h2><p>GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET is missing in .env.</p><p><a href="/">Return to Login</a></p></body></html>`,
-      { status: 500, headers: { "Content-Type": "text/html" } },
     );
+    return;
   }
 
   try {
@@ -169,17 +176,12 @@ export async function handleGitHubCallback(request: Request): Promise<Response> 
 </body>
 </html>`;
 
-    return new Response(htmlBridge, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/html",
-        "Set-Cookie": cookie,
-      },
-    });
+    res.setHeader("Set-Cookie", cookie);
+    res.setHeader("Content-Type", "text/html");
+    res.send(htmlBridge);
   } catch (err: any) {
-    return new Response(
+    res.status(500).send(
       `<!DOCTYPE html><html><head><title>OAuth Error</title><style>body{font-family:sans-serif;padding:40px;background:#0d1117;color:#fff;text-align:center}a{color:#58a6ff;text-decoration:none;font-weight:bold}</style></head><body><h2>Login Error</h2><p>${err.message}</p><p><a href="/">Return to Login</a></p></body></html>`,
-      { status: 500, headers: { "Content-Type": "text/html" } },
     );
   }
 }
@@ -187,18 +189,16 @@ export async function handleGitHubCallback(request: Request): Promise<Response> 
 /**
  * Returns the currently authenticated user's profile.
  */
-export async function handleGetUser(request: Request): Promise<Response> {
-  const token = getAuthToken(request);
+export async function handleGetUser(req: Request, res: Response): Promise<void> {
+  const token = getAuthToken(req);
 
   if (!token) {
-    return new Response(
-      JSON.stringify({ error: "Unauthorized", message: "User is not authenticated." }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
-    );
+    res.status(401).json({ error: "Unauthorized", message: "User is not authenticated." });
+    return;
   }
 
   try {
-    const res = await fetch("https://api.github.com/user", {
+    const userRes = await fetch("https://api.github.com/user", {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/vnd.github+json",
@@ -206,15 +206,13 @@ export async function handleGetUser(request: Request): Promise<Response> {
       },
     });
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ message: res.statusText }));
-      return new Response(JSON.stringify({ error: "GitHub Error", message: err.message }), {
-        status: res.status,
-        headers: { "Content-Type": "application/json" },
-      });
+    if (!userRes.ok) {
+      const err = await userRes.json().catch(() => ({ message: userRes.statusText }));
+      res.status(userRes.status).json({ error: "GitHub Error", message: err.message });
+      return;
     }
 
-    const userData = await res.json();
+    const userData = await userRes.json();
     const userProfile: GitHubUserProfile = {
       id: userData.id,
       login: userData.login,
@@ -228,75 +226,57 @@ export async function handleGetUser(request: Request): Promise<Response> {
       html_url: userData.html_url,
     };
 
-    return new Response(JSON.stringify(userProfile), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    res.json(userProfile);
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: "Server Error", message: err.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    res.status(500).json({ error: "Server Error", message: err.message });
   }
 }
 
 /**
  * Clears session and logs out.
  */
-export function handleLogout(): Response {
+export function handleLogout(_req: Request, res: Response): void {
   const cookie = "github_token=; Path=/; SameSite=Lax; Max-Age=0";
-  return new Response(
+  res.setHeader("Set-Cookie", cookie);
+  res.setHeader("Content-Type", "text/html");
+  res.send(
     `<!DOCTYPE html><html><body><script>localStorage.removeItem("github_token"); localStorage.removeItem("github_user"); window.location.href = "/";</script></body></html>`,
-    {
-      status: 200,
-      headers: {
-        "Content-Type": "text/html",
-        "Set-Cookie": cookie,
-      },
-    },
   );
 }
 
 /**
- * Node / Connect adapter for Vite dev server authentication routes.
+ * Node / Connect adapter for Vite dev server authentication routes (if needed).
  */
 export async function nodeAuthRouter(req: any, res: any, next: any) {
-  const protocol = req.socket?.encrypted ? "https" : "http";
-  const host = req.headers.host || "localhost:8080";
-  const fullUrl = `${protocol}://${host}${req.originalUrl || req.url}`;
-  const parsedUrl = new URL(fullUrl);
-
-  const reqHeaders = new Headers();
-  for (const [key, value] of Object.entries(req.headers)) {
-    if (value) reqHeaders.set(key, Array.isArray(value) ? value.join(", ") : (value as string));
+  if (typeof res.json !== "function") {
+    res.json = (data: any) => {
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify(data));
+    };
+    res.status = (code: number) => {
+      res.statusCode = code;
+      return res;
+    };
+    res.send = (body: string) => {
+      res.end(body);
+    };
+    res.redirect = (url: string) => {
+      res.statusCode = 302;
+      res.setHeader("Location", url);
+      res.end();
+    };
   }
 
-  const webRequest = new Request(fullUrl, {
-    method: req.method,
-    headers: reqHeaders,
-  });
-
-  let webResponse: Response | null = null;
-
-  if (parsedUrl.pathname === "/api/auth/github") {
-    webResponse = handleGitHubLogin(webRequest);
-  } else if (parsedUrl.pathname === "/api/auth/github/callback") {
-    webResponse = await handleGitHubCallback(webRequest);
-  } else if (parsedUrl.pathname === "/api/auth/user") {
-    webResponse = await handleGetUser(webRequest);
-  } else if (parsedUrl.pathname === "/api/auth/logout") {
-    webResponse = handleLogout();
+  const path = (req.originalUrl || req.url || "").split("?")[0];
+  if (path.endsWith("/github")) {
+    return handleGitHubLogin(req, res);
+  } else if (path.endsWith("/github/callback")) {
+    return handleGitHubCallback(req, res);
+  } else if (path.endsWith("/user")) {
+    return handleGetUser(req, res);
+  } else if (path.endsWith("/logout")) {
+    return handleLogout(req, res);
   }
 
-  if (webResponse) {
-    res.statusCode = webResponse.status;
-    webResponse.headers.forEach((val, key) => {
-      res.setHeader(key, val);
-    });
-    const body = await webResponse.text();
-    res.end(body);
-    return;
-  }
-
-  next();
+  if (next) next();
 }

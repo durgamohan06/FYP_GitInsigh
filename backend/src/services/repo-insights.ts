@@ -1,5 +1,6 @@
-import { extractGitHubToken, type SimplifiedRepo } from "./github-api";
-import { getEnv } from "../config/env";
+import type { Request, Response } from "express";
+import { extractGitHubToken, type SimplifiedRepo } from "./github-api.js";
+import { getEnv } from "../config/env.js";
 
 export interface ContributedRepo extends SimplifiedRepo {
   contribution_types: string[]; // e.g. ["PushEvent", "PullRequestEvent"]
@@ -222,17 +223,15 @@ export async function fetchContributedReposFromEvents(
 /**
  * PART 3: Combined Handler for GET /api/repos/insights
  */
-export async function handleGetRepoInsights(request: Request): Promise<Response> {
-  const token = extractGitHubToken(request);
+export async function handleGetRepoInsights(req: Request, res: Response): Promise<void> {
+  const token = extractGitHubToken(req);
 
   if (!token) {
-    return new Response(
-      JSON.stringify({
-        error: "Unauthorized",
-        message: "GitHub access token is required. Pass it via Authorization header or log in.",
-      }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
-    );
+    res.status(401).json({
+      error: "Unauthorized",
+      message: "GitHub access token is required. Pass it via Authorization header or log in.",
+    });
+    return;
   }
 
   const cleanToken = sanitizeToken(token);
@@ -272,21 +271,13 @@ export async function handleGetRepoInsights(request: Request): Promise<Response>
       contributedRepos,
     };
 
-    return new Response(JSON.stringify(payload), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-store, no-cache, must-revalidate",
-      },
-    });
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.json(payload);
   } catch (err: any) {
-    return new Response(
-      JSON.stringify({
-        error: "Repo Insights Error",
-        message: err.message || "Failed to fetch repository insights from GitHub.",
-      }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    res.status(500).json({
+      error: "Repo Insights Error",
+      message: err.message || "Failed to fetch repository insights from GitHub.",
+    });
   }
 }
 
