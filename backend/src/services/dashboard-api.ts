@@ -1,5 +1,6 @@
-import { extractGitHubToken, fetchGitHubUserRepos, type SimplifiedRepo } from "./github-api";
-import { getEnv } from "../config/env";
+import type { Request, Response } from "express";
+import { extractGitHubToken, fetchGitHubUserRepos, type SimplifiedRepo } from "./github-api.js";
+import { getEnv } from "../config/env.js";
 
 export interface DashboardMetricStat {
   label: string;
@@ -115,31 +116,27 @@ function formatRelativeTime(dateString: string): string {
 /**
  * Main aggregator handler for GET /api/dashboard
  */
-export async function handleGetDashboard(request: Request): Promise<Response> {
-  const token = extractGitHubToken(request);
+export async function handleGetDashboard(req: Request, res: Response): Promise<void> {
+  const token = extractGitHubToken(req);
 
   if (!token) {
-    return new Response(
-      JSON.stringify({
-        error: "Unauthorized",
-        message: "GitHub access token is required. Please log in or configure GITHUB_ACCESS_TOKEN.",
-      }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
-    );
+    res.status(401).json({
+      error: "Unauthorized",
+      message: "GitHub access token is required. Please log in or configure GITHUB_ACCESS_TOKEN.",
+    });
+    return;
   }
 
   const cleanToken = sanitizeToken(token);
-  const url = new URL(request.url);
-  const isRefresh = url.searchParams.get("refresh") === "true";
+  const isRefresh = req.query.refresh === "true";
   const cacheKey = cleanToken.slice(-10);
 
   if (!isRefresh && dashboardCache.has(cacheKey)) {
     const cached = dashboardCache.get(cacheKey)!;
     if (Date.now() - cached.timestamp < CACHE_TTL_MS) {
-      return new Response(JSON.stringify(cached.data), {
-        status: 200,
-        headers: { "Content-Type": "application/json", "X-Cache": "HIT" },
-      });
+      res.setHeader("X-Cache", "HIT");
+      res.json(cached.data);
+      return;
     }
   }
 
@@ -383,13 +380,8 @@ export async function handleGetDashboard(request: Request): Promise<Response> {
 
     dashboardCache.set(cacheKey, { data: payload, timestamp: Date.now() });
 
-    return new Response(JSON.stringify(payload), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=60, stale-while-revalidate=30",
-      },
-    });
+    res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=30");
+    res.json(payload);
   } catch (err: any) {
     console.warn("[Dashboard API] GitHub API fetch error, providing cached/fallback telemetry:", err.message);
 
@@ -445,13 +437,8 @@ export async function handleGetDashboard(request: Request): Promise<Response> {
       heatmap: Array.from({ length: 7 }, () => Array.from({ length: 26 }, () => (Math.random() > 0.4 ? Math.floor(Math.random() * 5) : 0))),
     };
 
-    return new Response(JSON.stringify(fallbackPayload), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=30",
-      },
-    });
+    res.setHeader("Cache-Control", "public, max-age=30");
+    res.json(fallbackPayload);
   }
 }
 
@@ -459,32 +446,16 @@ export async function handleGetDashboard(request: Request): Promise<Response> {
  * Node / Connect middleware adapter for Vite dev server
  */
 export async function nodeDashboardHandler(req: any, res: any) {
-  if (req.method !== "GET") {
-    res.statusCode = 405;
+  if (typeof res.json === "function") {
+    return handleGetDashboard(req, res);
+  }
+  res.json = (data: any) => {
     res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ error: "Method Not Allowed" }));
-    return;
-  }
-
-  const protocol = req.socket?.encrypted ? "https" : "http";
-  const host = req.headers.host || "localhost:8080";
-  const fullUrl = `${protocol}://${host}${req.originalUrl || req.url}`;
-
-  const reqHeaders = new Headers();
-  for (const [key, value] of Object.entries(req.headers)) {
-    if (value) reqHeaders.set(key, Array.isArray(value) ? value.join(", ") : (value as string));
-  }
-
-  const webRequest = new Request(fullUrl, {
-    method: req.method,
-    headers: reqHeaders,
-  });
-
-  const response = await handleGetDashboard(webRequest);
-  res.statusCode = response.status;
-  response.headers.forEach((val, key) => {
-    res.setHeader(key, val);
-  });
-  const body = await response.text();
-  res.end(body);
+    res.end(JSON.stringify(data));
+  };
+  res.status = (code: number) => {
+    res.statusCode = code;
+    return res;
+  };
+  return handleGetDashboard(req, res);
 }

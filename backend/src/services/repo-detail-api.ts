@@ -1,5 +1,6 @@
-import { extractGitHubToken } from "./github-api";
-import { getEnv } from "../config/env";
+import type { Request, Response } from "express";
+import { extractGitHubToken } from "./github-api.js";
+import { getEnv } from "../config/env.js";
 
 export interface ContributorDetail {
   login: string;
@@ -559,52 +560,39 @@ export async function fetchRepositoryDetail(
 /**
  * HTTP Handler for GET /api/repos/detail?owner=...&repo=...&timeframe=30d
  */
-export async function handleGetRepoDetail(request: Request): Promise<Response> {
-  const token = extractGitHubToken(request);
+export async function handleGetRepoDetail(req: Request, res: Response): Promise<void> {
+  const token = extractGitHubToken(req);
 
   if (!token) {
-    return new Response(
-      JSON.stringify({
-        error: "Unauthorized",
-        message: "GitHub access token is required. Please log in or configure GITHUB_ACCESS_TOKEN.",
-      }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
-    );
+    res.status(401).json({
+      error: "Unauthorized",
+      message: "GitHub access token is required. Please log in or configure GITHUB_ACCESS_TOKEN.",
+    });
+    return;
   }
 
-  const url = new URL(request.url);
-  const owner = url.searchParams.get("owner");
-  const repo = url.searchParams.get("repo");
-  const timeframe = (url.searchParams.get("timeframe") || "30d") as
+  const owner = req.query.owner as string | undefined;
+  const repo = req.query.repo as string | undefined;
+  const timeframe = ((req.query.timeframe as string) || "30d") as
     "7d" | "30d" | "3m" | "6m" | "1y";
 
   if (!owner || !repo) {
-    return new Response(
-      JSON.stringify({
-        error: "Bad Request",
-        message: "Missing 'owner' or 'repo' query parameter.",
-      }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
+    res.status(400).json({
+      error: "Bad Request",
+      message: "Missing 'owner' or 'repo' query parameter.",
+    });
+    return;
   }
 
   try {
     const data = await fetchRepositoryDetail(owner, repo, token, timeframe);
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=30, stale-while-revalidate=15",
-      },
-    });
+    res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=15");
+    res.json(data);
   } catch (err: any) {
-    return new Response(
-      JSON.stringify({
-        error: "Repository Detail Error",
-        message: err.message || "Failed to fetch repository analytics from GitHub API.",
-      }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    res.status(500).json({
+      error: "Repository Detail Error",
+      message: err.message || "Failed to fetch repository analytics from GitHub API.",
+    });
   }
 }
 
