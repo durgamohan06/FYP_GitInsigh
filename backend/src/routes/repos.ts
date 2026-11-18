@@ -10,10 +10,9 @@ import { Router } from "express";
 import { handleGetRepos } from "../services/github-api.js";
 import { handleGetRepoInsights } from "../services/repo-insights.js";
 import { handleGetRepoDetail } from "../services/repo-detail-api.js";
-import { adaptWebHandler } from "../utils/adapt-web-handler.js";
 
 export const reposRoutes = Router();
 
-reposRoutes.get("/", adaptWebHandler(handleGetRepos));
-reposRoutes.get("/insights", adaptWebHandler(handleGetRepoInsights));
-reposRoutes.get("/detail", adaptWebHandler(handleGetRepoDetail));
+reposRoutes.get("/", handleGetRepos);
+reposRoutes.get("/insights", handleGetRepoInsights);
+reposRoutes.get("/detail", handleGetRepoDetail);

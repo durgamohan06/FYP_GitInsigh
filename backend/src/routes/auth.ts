@@ -15,11 +15,10 @@ import {
   handleGetUser,
   handleLogout,
 } from "../services/github-oauth.js";
-import { adaptWebHandler } from "../utils/adapt-web-handler.js";
 
 export const authRoutes = Router();
 
-authRoutes.get("/github", adaptWebHandler(handleGitHubLogin));
-authRoutes.get("/github/callback", adaptWebHandler(handleGitHubCallback));
-authRoutes.get("/user", adaptWebHandler(handleGetUser));
-authRoutes.get("/logout", adaptWebHandler(handleLogout));
+authRoutes.get("/github", handleGitHubLogin);
+authRoutes.get("/github/callback", handleGitHubCallback);
+authRoutes.get("/user", handleGetUser);
+authRoutes.get("/logout", handleLogout);

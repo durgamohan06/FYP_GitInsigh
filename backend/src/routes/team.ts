@@ -8,9 +8,8 @@
 import { Router } from "express";
 import { handleGetTeamAnalytics } from "../services/github-team-analytics-api.js";
 import { handleGetTeamProjects } from "../services/github-team-projects-api.js";
-import { adaptWebHandler } from "../utils/adapt-web-handler.js";
 
 export const teamRoutes = Router();
 
-teamRoutes.get("/analytics", adaptWebHandler(handleGetTeamAnalytics));
-teamRoutes.get("/projects", adaptWebHandler(handleGetTeamProjects));
+teamRoutes.get("/analytics", handleGetTeamAnalytics);
+teamRoutes.get("/projects", handleGetTeamProjects);

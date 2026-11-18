@@ -20,10 +20,16 @@ import {
   Loader2,
   RefreshCw,
   Search,
+  Sparkles,
   User,
   X,
 } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { SteppedBarChart } from "@/components/SteppedBarChart";
+import {
+  DEMO_REPOS,
+  DEMO_PROJECT_SUMMARIES,
+  getDemoTeamAnalytics,
+} from "@/utils/team-demo-data";
 
 export const Route = createFileRoute("/team")({
   head: () => ({ meta: [{ title: "Team Analytics · GitInsight AI" }] }),
@@ -432,12 +438,22 @@ function Team() {
   const [data, setData] = useState<TeamAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [projectSummaries, setProjectSummaries] = useState<Record<string, MemberProjectSummary>>(
     {},
   );
 
-  // Load repos on mount — auto-select most recently pushed (sorted by pushedAt desc)
+  const activateDemoMode = (repoName?: string) => {
+    setIsDemoMode(true);
+    setError("");
+    setRepos(DEMO_REPOS);
+    const chosen = repoName || DEMO_REPOS[0].fullName;
+    setSelectedRepo(chosen);
+    setData(getDemoTeamAnalytics(chosen));
+    setProjectSummaries(DEMO_PROJECT_SUMMARIES);
+  };
 
+  // Load repos on mount — auto-select most recently pushed (sorted by pushedAt desc)
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -445,12 +461,17 @@ function Team() {
       .getRepositories()
       .then((result) => {
         if (cancelled) return;
-        setRepos(result);
-        if (result[0]) setSelectedRepo((prev) => prev || result[0].fullName);
+        if (result && result.length > 0) {
+          setRepos(result);
+          if (result[0]) setSelectedRepo((prev) => prev || result[0].fullName);
+        } else {
+          activateDemoMode();
+        }
       })
-      .catch((reason) =>
-        setError(reason instanceof Error ? reason.message : "Unable to load GitHub repositories."),
-      )
+      .catch((reason) => {
+        console.warn("Unable to load GitHub repositories, falling back to demo mode:", reason);
+        activateDemoMode();
+      })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
@@ -462,6 +483,11 @@ function Team() {
   // Reload analytics when selected repo or date range changes
   useEffect(() => {
     if (!selectedRepo) return;
+    if (isDemoMode) {
+      setData(getDemoTeamAnalytics(selectedRepo));
+      return;
+    }
+
     let cancelled = false;
     setLoading(true);
     teamAnalyticsService
@@ -470,8 +496,10 @@ function Team() {
         if (!cancelled) setData(result);
       })
       .catch((reason) => {
-        if (!cancelled)
-          setError(reason instanceof Error ? reason.message : "Unable to load GitHub analytics.");
+        if (!cancelled) {
+          console.warn("Unable to load GitHub analytics, falling back to demo data:", reason);
+          activateDemoMode(selectedRepo);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -479,7 +507,7 @@ function Team() {
     return () => {
       cancelled = true;
     };
-  }, [selectedRepo, range]);
+  }, [selectedRepo, range, isDemoMode]);
 
   // Load project summaries when contributor list changes
   useEffect(() => {
@@ -554,6 +582,26 @@ function Team() {
         </select>
       </div>
 
+      {/* ── Demo Mode Indicator Banner ── */}
+      {isDemoMode && (
+        <div className="mb-6 p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs flex flex-wrap items-center justify-between gap-3 text-blue-700 dark:text-cyan-300">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 shrink-0 text-blue-600 dark:text-cyan-400" />
+            <span>
+              <strong>Demo Telemetry Mode:</strong> Showing interactive sample team metrics because GitHub token is not connected or has expired.
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.location.reload()}
+            className="h-7 text-xs font-medium cursor-pointer"
+          >
+            <RefreshCw className="w-3.5 h-3.5 mr-1" /> Retry Live GitHub
+          </Button>
+        </div>
+      )}
+
       {/* ── Content ── */}
       {loading ? (
         <LoadingState />
@@ -561,9 +609,14 @@ function Team() {
         <Card className="p-8 text-center">
           <AlertCircle className="mx-auto h-8 w-8 text-danger" />
           <p className="mt-3">{error}</p>
-          <Button className="mt-4" onClick={() => window.location.reload()}>
-            <RefreshCw className="h-4 w-4" /> Retry
-          </Button>
+          <div className="flex items-center justify-center gap-3 mt-4">
+            <Button onClick={() => window.location.reload()}>
+              <RefreshCw className="h-4 w-4" /> Retry
+            </Button>
+            <Button variant="secondary" onClick={() => activateDemoMode()}>
+              <Sparkles className="h-4 w-4" /> View Demo Telemetry
+            </Button>
+          </div>
         </Card>
       ) : !contributors.length ? (
         <Card className="p-10 text-center">
@@ -573,6 +626,11 @@ function Team() {
               ? `No contributors were found in ${selectedRepo}.`
               : "Select a repository to view contributors."}
           </p>
+          <div className="mt-4">
+            <Button variant="secondary" onClick={() => activateDemoMode()}>
+              <Sparkles className="h-4 w-4" /> Load Demo Data
+            </Button>
+          </div>
         </Card>
       ) : (
         <>
@@ -600,6 +658,29 @@ function Team() {
             ))}
           </div>
 
+          {/* Stepped Funnel Contribution Bar Chart (Reference Design) */}
+          <div className="mb-6">
+            <SteppedBarChart
+              data={contributors.map((d) => ({
+                id: d.id,
+                label: d.name || d.username,
+                sublabel: `@${d.username}`,
+                value: d[metric],
+                avatar: d.avatar,
+                avatarUrl: d.avatarUrl,
+                badge: d.grade,
+                role: d.role,
+                onClick: () => handleSelectContributor(d.username || d.id),
+              }))}
+              metricLabel={metrics[metric]}
+              currentMetric={metric}
+              metricOptions={metrics}
+              onMetricChange={(val) => setMetric(val as ContributionMetric)}
+              activeId={developer !== "all" ? developer : undefined}
+              onSelect={(item) => handleSelectContributor(item.id)}
+            />
+          </div>
+
           {/* Contributor cards */}
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 mb-6">
             {contributors.map((d) => (
@@ -611,41 +692,6 @@ function Team() {
               />
             ))}
           </div>
-
-          {/* Contribution comparison chart */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="font-semibold">Contribution comparison</div>
-              <select
-                className="h-9 rounded-lg border border-border bg-card px-3 text-sm"
-                value={metric}
-                onChange={(e) => setMetric(e.target.value as ContributionMetric)}
-                aria-label="Comparison metric"
-                id="metric-select"
-              >
-                {Object.entries(metrics).map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="h-72">
-              <ResponsiveContainer>
-                <BarChart data={chartData}>
-                  <CartesianGrid
-                    stroke="var(--color-border)"
-                    strokeDasharray="3 3"
-                    vertical={false}
-                  />
-                  <XAxis dataKey="developer" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="var(--color-brand)" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
         </>
       )}
     </AppShell>

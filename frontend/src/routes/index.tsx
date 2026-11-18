@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { LandingPageComponent } from "../components/LandingPage";
-import "../landing.css";
 
 export const Route = createFileRoute("/")({
   head: () => ({

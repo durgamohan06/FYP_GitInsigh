@@ -6,8 +6,7 @@
 
 import { Router } from "express";
 import { handleGetNotifications } from "../services/github-global-api.js";
-import { adaptWebHandler } from "../utils/adapt-web-handler.js";
 
 export const notificationsRoutes = Router();
 
-notificationsRoutes.get("/", adaptWebHandler(handleGetNotifications));
+notificationsRoutes.get("/", handleGetNotifications);

@@ -1,4 +1,5 @@
-import { getEnv } from "../config/env";
+import type { Request, Response } from "express";
+import { getEnv } from "../config/env.js";
 
 export interface SimplifiedRepo {
   id: number;
@@ -46,14 +47,32 @@ function sanitizeToken(token: string): string {
 /**
  * Extracts GitHub token from Authorization header, custom header, or environment variables.
  */
-export function extractGitHubToken(request: Request): string | null {
-  const cookieHeader = request.headers.get("cookie") || request.headers.get("Cookie");
+export function extractGitHubToken(request: Request | any): string | null {
+  // 1. Check cookies
+  let cookieHeader: string | undefined;
+  if (request?.headers) {
+    if (typeof request.headers.get === "function") {
+      cookieHeader = request.headers.get("cookie") || request.headers.get("Cookie") || undefined;
+    } else {
+      const c = request.headers["cookie"] || request.headers["Cookie"];
+      cookieHeader = Array.isArray(c) ? c.join("; ") : c;
+    }
+  }
   if (cookieHeader) {
     const match = cookieHeader.match(/(?:^|;\s*)github_token=([^;]*)/);
     if (match && match[1]) return sanitizeToken(decodeURIComponent(match[1]));
   }
 
-  const authHeader = request.headers.get("authorization") || request.headers.get("Authorization");
+  // 2. Check Authorization header
+  let authHeader: string | undefined;
+  if (request?.headers) {
+    if (typeof request.headers.get === "function") {
+      authHeader = request.headers.get("authorization") || request.headers.get("Authorization") || undefined;
+    } else {
+      const a = request.headers["authorization"] || request.headers["Authorization"];
+      authHeader = Array.isArray(a) ? a.join(", ") : a;
+    }
+  }
   if (authHeader) {
     if (authHeader.startsWith("Bearer ") || authHeader.startsWith("bearer ")) {
       return sanitizeToken(authHeader.slice(7));
@@ -64,12 +83,21 @@ export function extractGitHubToken(request: Request): string | null {
     return sanitizeToken(authHeader);
   }
 
-  const customHeader = request.headers.get("x-github-token");
+  // 3. Check custom header
+  let customHeader: string | undefined;
+  if (request?.headers) {
+    if (typeof request.headers.get === "function") {
+      customHeader = request.headers.get("x-github-token") || undefined;
+    } else {
+      const h = request.headers["x-github-token"];
+      customHeader = Array.isArray(h) ? h.join(", ") : h;
+    }
+  }
   if (customHeader) {
     return sanitizeToken(customHeader);
   }
 
-  // Fallback to environment variable
+  // 4. Fallback to environment variable
   const envToken = getEnv("GITHUB_ACCESS_TOKEN") || getEnv("GITHUB_TOKEN") || null;
   return envToken ? sanitizeToken(envToken) : null;
 }
@@ -169,34 +197,16 @@ export async function fetchGitHubUserRepos(token: string): Promise<{
 /**
  * Handler for GET /api/repos
  */
-export async function handleGetRepos(request: Request): Promise<Response> {
-  if (request.method !== "GET") {
-    return new Response(
-      JSON.stringify({
-        error: "Method Not Allowed",
-        message: "Only GET is supported on /api/repos",
-      }),
-      {
-        status: 405,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-  }
-
-  const token = extractGitHubToken(request);
+export async function handleGetRepos(req: Request, res: Response): Promise<void> {
+  const token = extractGitHubToken(req);
 
   if (!token) {
-    return new Response(
-      JSON.stringify({
-        error: "Unauthorized",
-        message:
-          "GitHub access token is required. Pass it via 'Authorization: Bearer <token>' header or define GITHUB_ACCESS_TOKEN in your .env file.",
-      }),
-      {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+    res.status(401).json({
+      error: "Unauthorized",
+      message:
+        "GitHub access token is required. Pass it via 'Authorization: Bearer <token>' header or define GITHUB_ACCESS_TOKEN in your .env file.",
+    });
+    return;
   }
 
   try {
@@ -212,25 +222,14 @@ export async function handleGetRepos(request: Request): Promise<Response> {
       data: repos,
     };
 
-    return new Response(JSON.stringify(payload), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-store, no-cache, must-revalidate",
-      },
-    });
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.json(payload);
   } catch (err: any) {
     const status = err.status || 500;
-    return new Response(
-      JSON.stringify({
-        error: "GitHub API Error",
-        message: err.message || "Failed to fetch repositories from GitHub",
-      }),
-      {
-        status,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+    res.status(status).json({
+      error: "GitHub API Error",
+      message: err.message || "Failed to fetch repositories from GitHub",
+    });
   }
 }
 

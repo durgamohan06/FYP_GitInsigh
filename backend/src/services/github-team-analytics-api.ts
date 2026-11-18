@@ -1,5 +1,6 @@
-import { extractGitHubToken } from "./github-api";
-import { calculateContributorScore } from "../utils/contributor-scoring";
+import type { Request, Response } from "express";
+import { extractGitHubToken } from "./github-api.js";
+import { calculateContributorScore } from "../utils/contributor-scoring.js";
 
 export interface TeamAnalyticsApiData {
   repository: {
@@ -126,27 +127,19 @@ function dateStart(range: string) {
   return new Date(Date.now() - days * 86400000).toISOString();
 }
 
-export async function handleGetTeamAnalytics(request: Request): Promise<Response> {
-  if (request.method !== "GET")
-    return Response.json({ error: "Method Not Allowed" }, { status: 405 });
-
-  const token = extractGitHubToken(request);
+export async function handleGetTeamAnalytics(req: Request, res: Response): Promise<void> {
+  const token = extractGitHubToken(req);
   if (!token) {
-    return Response.json(
-      { error: "Unauthorized", message: "Connect GitHub to load contributors." },
-      { status: 401 },
-    );
+    res.status(401).json({ error: "Unauthorized", message: "Connect GitHub to load contributors." });
+    return;
   }
 
-  const url = new URL(request.url);
-  const repository = url.searchParams.get("repository") ?? "";
-  const range = url.searchParams.get("dateRange") ?? "30d";
+  const repository = (req.query.repository as string) ?? "";
+  const range = (req.query.dateRange as string) ?? "30d";
 
   if (!repository || !repository.includes("/")) {
-    return Response.json(
-      { error: "A repository in owner/name format is required." },
-      { status: 400 },
-    );
+    res.status(400).json({ error: "A repository in owner/name format is required." });
+    return;
   }
 
   const [owner, repo] = repository.split("/");
@@ -308,14 +301,12 @@ export async function handleGetTeamAnalytics(request: Request): Promise<Response
       timeline,
     };
 
-    return Response.json(payload, { headers: { "Cache-Control": "no-store" } });
+    res.setHeader("Cache-Control", "no-store");
+    res.json(payload);
   } catch (error) {
-    return Response.json(
-      {
-        error: "GitHub API Error",
-        message: error instanceof Error ? error.message : "Unable to load repository analytics.",
-      },
-      { status: 502 },
-    );
+    res.status(502).json({
+      error: "GitHub API Error",
+      message: error instanceof Error ? error.message : "Unable to load repository analytics.",
+    });
   }
 }
